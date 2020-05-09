@@ -1,0 +1,4 @@
+#!/bin/bash
+/bin/mkdir -p ~/.trash
+/bin/mv "$@" ~/.trash/
+

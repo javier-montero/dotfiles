@@ -1,0 +1,20 @@
+#!/bin/bash
+
+OPTIND=1
+local mycase=""
+local usage="fstr: find string in files.\nUsage: fstr [-i] \"pattern\" [\"filename pattern\"] "
+
+while getopts :it opt
+do
+	case "$opt" in
+		i) mycase="-i " ;;
+		*) echo "$usage"; return ;;
+	esac
+done
+shift $(( $OPTIND - 1 ))
+
+if [ "$#" -lt 1 ]; then
+	echo "$usage"
+	return;
+fi
+find . -type f -name "${2:-*}" -print0 | xargs -0 egrep --color=always -sn ${case} "$1" 2>&- | more

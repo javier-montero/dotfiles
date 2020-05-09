@@ -1,0 +1,8 @@
+#!/bin/bash
+
+if [ $# -eq 2 ]
+then
+	diff $1 $2 --old-group-format=$'\e[0;31m%<\e[0m' --old-line-format=$"%dn: %L" --new-group-format=$'\e[0;32m%>\e[0m' --unchanged-group-format=''
+else
+	echo "USAGE: cdiff file1 file2"
+fi

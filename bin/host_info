@@ -1,0 +1,13 @@
+#!/bin/bash
+source colores.sh
+
+echo -e "\nYou are logged on ${RED}`hostname`${NC}"
+echo -e "\n${RED}Additionnal information:${NC} " ; uname -a
+echo -e "\n${RED}Users logged on:${NC} " ; w -hs | cut -d " " -f1 | sort | uniq
+echo -e "\n${RED}Current date :${NC} " ; date
+echo -e "\n${RED}Machine stats :${NC} " ; uptime
+echo -e "\n${RED}Memory stats :${NC} " ; free
+echo -e "\n${RED}Diskspace :${NC} " ; cdf / $HOME
+echo -e "\n${RED}Local IP Address :${NC}" ; my_ip
+echo -e "\n${RED}Open connections :${NC} "; netstat -pan --inet;
+echo
