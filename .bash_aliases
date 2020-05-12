@@ -34,8 +34,6 @@ alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo
 
 
 # User defined scripts/alias'
-alias rm='rm -i'
-alias cp='cp -i'
 alias mv='mv -i'
 # -> Prevents accidentally clobbering files.
 alias mkdir='mkdir -p'
