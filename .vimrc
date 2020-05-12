@@ -71,3 +71,8 @@ let g:syntastic_check_on_wq = 0
 "GITGUTTER
 let g:gitgutter_max_signs = 250	" default value (Vim < 8.1.0614, Neovim < 0.4.0)
 let g:gitgutter_max_signs = -1	" default value (otherwise)
+
+"GOYO
+let g:goyo_width = 100				" default: 80
+let g:goyo_height = 85				" default: 85%
+let g:goyo_linenr = 0				" default: 0
