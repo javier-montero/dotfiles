@@ -3,6 +3,13 @@ autocmd BufRead,BufNewFile *.md :Goyo 100
 
 " ensure :q quits when goyo is active
 function! s:goyo_enter()
+	set shortmess=F
+	set noshowmode
+	set noshowcmd
+	set noruler
+	set scrolloff=999
+	set laststatus=0
+	set cmdheight=1
 	let b:quitting = 0
 	let b:quitting_bang = 0
 	autocmd QuitPre <buffer> let b:quitting = 1
@@ -10,7 +17,10 @@ function! s:goyo_enter()
 endfunction
 
 function! s:goyo_leave()
-" Quit Vim if this is the only remaining buffer
+	set showmode
+	set showcmd
+	set ruler
+	set scrolloff=5
 	if b:quitting && len(filter(range(1, bufnr('$')), 'buflisted(v:val)')) == 1
 		if b:quitting_bang
 			qa!
