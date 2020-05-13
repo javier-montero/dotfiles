@@ -35,6 +35,10 @@ if has("autocmd")				" return to last known cursor position
 	au BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exe "normal! g`\"" | endif
 endif
 
+cnoreabbrev wq write\|BDQ			" rewrite wq
+cnoreabbrev q BDQ				" rewrite q
+command! -nargs=0 BDQ bd|q 		" closes buffer before quit
+
 "SEARCH
 set incsearch					" search as characters are entered
 set hlsearch					" highlight matches
@@ -63,10 +67,13 @@ set statusline+=%#warningmsg#
 set statusline+=%{SyntasticStatuslineFlag()}
 set statusline+=%*
 
-let g:syntastic_always_populate_loc_list = 1
-let g:syntastic_auto_loc_list = 1
-let g:syntastic_check_on_open = 1
+let g:syntastic_always_populate_loc_list = 0
+let g:syntastic_auto_loc_list = 0
+let g:syntastic_check_on_open = 0
 let g:syntastic_check_on_wq = 0
+let g:syntastic_enable_signs = 1
+let g:syntastic_error_symbol = "\u2717"
+let g:syntastic_warning_symbol = "\u2757"
 
 "GITGUTTER
 let g:gitgutter_max_signs = 250	" default value (Vim < 8.1.0614, Neovim < 0.4.0)
