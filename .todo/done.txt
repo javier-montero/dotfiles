@@ -1,3 +1,4 @@
-x 2020-05-10 desolder cherry browns +project +me
-x 2020-05-10 desolder cherry blue +project +me
-x 2020-05-10 solder cherry browns +project +me
+x 2020-05-10 desolder cherry browns +project +keyboard
+x 2020-05-10 desolder cherry blue +project +keyboard
+x 2020-05-10 solder cherry browns +project +keyboard
+x 2020-05-12 finish book command +project +vim
