@@ -1,5 +1,5 @@
 " start md files in goyo mode
-autocmd BufRead,BufNewFile *.md :Goyo 100
+autocmd BufRead,BufNewFile *.md :Goyo
 
 " ensure :q quits when goyo is active
 function! s:goyo_enter()
