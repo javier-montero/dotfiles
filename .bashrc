@@ -95,6 +95,10 @@ function _exit()              # Function to run upon exit of shell.
 	then
 		~/bin/todo.sh lsp a
 	fi
+	if [ -f ~/.bash_logout ]
+	then
+		source ~/.bash_logout
+	fi
 }
 trap _exit EXIT
 

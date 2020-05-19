@@ -1,0 +1,28 @@
+#!/bin/bash
+
+if [ $# -ne 1 ]
+then
+	exit
+fi
+
+daily_tasks=~/.daily_tasks
+directory=$1
+year=$(date +"%Y")
+month=$(date +"%m")
+day=$(date +"%d")
+
+cd $directory 2>&1
+git checkout master 2>&1 | tee -a $daily_tasks >/dev/null
+git pull origin master 2>&1 | tee -a $daily_tasks >/dev/null
+git add . 2>&1 | tee -a $daily_tasks >/dev/null
+git commit --allow-empty -m "CHANGE ${year}/${month}/${day}" 2>&1 | tee -a $daily_tasks >/dev/null
+
+git log --stat | cat
+read -p "Are you sure you want to push this commit? Y|y for yes, N|n for no: " answer
+answer=${answer:-N}
+if [[ "$answer" != "Y" && "$answer" != "y" ]]
+then
+	git reset HEAD^
+	exit
+fi
+git push origin master 2>&1 | tee -a $daily_tasks

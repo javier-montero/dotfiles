@@ -1,0 +1,37 @@
+#!/bin/bash
+
+positional=()
+while [[ $# -gt 0 ]]
+do
+	key="$1"
+	case $key in
+		-f|--force)
+			is_run=true
+			shift
+			;;
+	esac
+done
+
+set -- "${positional}"
+daily_tasks=~/.daily_tasks
+today=$(date +"%Y%m%d")
+
+touch $daily_tasks
+
+if ! $is_run
+then
+	if grep -q "$today" $daily_tasks 2>/dev/null
+	then
+		exit
+	fi
+fi
+
+read -p "Are you sure you want to run daily tasks? Y|y for yes, N|n for no: " answer
+answer=${answer:-N}
+if [[ $answer == "Y" ]] || [[ $answer == "y" ]]
+then
+	echo $today > $daily_tasks
+	daily_git_push ~/.know
+	daily_git_push ~/.invent
+	daily_git_push ~/.todo
+fi

@@ -3,6 +3,5 @@ if [ $# -lt 1 ]
 then
 	echo "Usage: $0 [file(s)]"
 fi
-/bin/mkdir -p ~/.trash
-/bin/mv "$@" ~/.trash/
-
+/bin/mkdir -p ~/.bak
+/bin/cp -r "$@" ~/.bak
