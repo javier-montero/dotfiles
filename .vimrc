@@ -1,4 +1,6 @@
 syntax enable
+set encoding=utf-8
+set nocompatible
 
 "THEME
 set termguicolors
@@ -8,7 +10,21 @@ colorscheme sonokai
 
 let g:pathogen_disabled = []
 call add(g:pathogen_disabled, 'vim-coloresque')
+call add(g:pathogen_disabled, 'syntastic')
+call add(g:pathogen_disabled, 'vim-gitgutter')
 execute pathogen#infect()
+
+"Terminal
+fu GetTerm()
+	terminal
+	wincmd x
+	res 40
+endfu
+"autocmd VimEnter * call GetTerm()
+
+"MAPPING
+:map <esc>[1;5D <C-Left>
+:map <esc>[1;5C <C-Right>
 
 "TAB
 set tabstop=4
@@ -18,9 +34,10 @@ set noexpandtab
 set list
 set listchars=tab:>.,trail:.,extends:#,nbsp:.
 
-set number
+set backspace=indent,eol,start
+set nonumber
 set showcmd
-set cursorline
+set nocursorline
 set title
 set titlestring=%t%(\ (\ %{expand(\"%:p:h\")}\ )%)%(\ %a%)\ -\ [%{$USER}@%{hostname()}]
 set titleold=					" reset title when exiting vim"
@@ -42,22 +59,30 @@ set wildmode=longest:full,longest
 set wildmenu					" visual autocomplete for command menu
 
 "SEARCH
-set incsearch					" search as characters are entered
+set noincsearch					" don't search as characters are entered
 set hlsearch					" highlight matches
 set ignorecase
 set smartcase					" ignore case if search pattern is all lowercase
 nnoremap <F12> :noh<CR>			" no highlight
+vnoremap / <Esc>/\%><C-R>=line("'<")-1<CR>l\%<<C-R>=line("'>")+1<CR>l
+
+"SPLIT
+set splitright
+
+"COPY/PASTE
+set clipboard=unnamedplus
 
 "FOLD
 "filetype indent on				" load filetype-specific indent files
 set foldenable					" enable folding
 set foldmethod=indent			" fold automatically based on indent
-set foldlevelstart=3			" fold to n level
+set foldlevelstart=2			" fold to n level
 set foldnestmax=4
 nnoremap <space> za				" space open/closes folds
 
 "NERDTREE
 map <F1> :NERDTreeToggle<CR>
+let g:NERDTreeWinSize=40
 
 "AIRLINE
 let g:airline#extensions#tabline#enabled = 1
@@ -87,3 +112,8 @@ let g:gitgutter_max_signs = -1	" default value (otherwise)
 let g:goyo_width = 80				" default: 80
 let g:goyo_height = 80				" default: 85%
 let g:goyo_linenr = 0				" default: 0
+
+"Emmet
+let g:user_emmet_install_global = 0
+autocmd FileType html,css EmmetInstall
+"see: https://raw.githubusercontent.com/mattn/emmet-vim/master/TUTORIAL
