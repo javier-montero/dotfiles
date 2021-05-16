@@ -1,5 +1,0 @@
-(A) replace ssd on yoga +project +computer
-finish nas +project +server
-(B) theme changer +project +bash
-finish ps vita ui reskin +project +vita +lua
-cleanup goodreads to-read list +books
