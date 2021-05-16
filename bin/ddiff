@@ -1,0 +1,8 @@
+#!/bin/bash
+
+if [ $# -ne 2 ]
+then
+	echo "USAGE: ddiff directory1 directory2"
+	exit
+fi
+diff --brief --recursive --new-file $1 $2
