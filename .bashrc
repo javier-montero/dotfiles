@@ -6,7 +6,7 @@
 #-------------------------------------------------------------
 
 if [ -f /etc/bashrc ]; then
-      . /etc/bashrc   # --> Read /etc/bashrc, if present.
+	. /etc/bashrc   # --> Read /etc/bashrc, if present.
 fi
 
 #============================================================
@@ -14,6 +14,11 @@ fi
 #  PATH
 #
 #============================================================
+
+if ! [[ "$PATH" =~ "$HOME/.local/bin:$HOME/bin:" ]]
+then
+	PATH="$HOME/.local/bin:$HOME/bin:$PATH"
+fi
 
 export PATH=$PATH:~/bin:~/.local/bin
 
@@ -84,24 +89,6 @@ NC="\[\e[m\]"               # Color Reset
 
 ALERT=${BWhite}${On_Red} # Bold White on red background
 
-if [ -x ~/bin/todo.sh ]
-then
-	~/bin/todo.sh list
-fi
-
-function _exit()              # Function to run upon exit of shell.
-{
-	if [ -x ~/bin/todo.sh ]
-	then
-		~/bin/todo.sh lsp a
-	fi
-	if [ -f ~/.bash_logout ]
-	then
-		source ~/.bash_logout
-	fi
-}
-trap _exit EXIT
-
 #-------------------------------------------------------------
 # Shell Prompt
 #-------------------------------------------------------------
@@ -146,12 +133,11 @@ export LESS_TERMCAP_so=$'\E[01;44;33m'
 export LESS_TERMCAP_ue=$'\E[0m'
 export LESS_TERMCAP_us=$'\E[01;32m'
 
-function man()
-{
-    for i ; do
-        xtitle The $(basename $1|tr -d .[:digit:]) manual
-        command man -a "$i"
-    done
+function man() {
+	for i ; do
+		xtitle The $(basename $1|tr -d .[:digit:]) manual
+		command man -a "$i"
+	done
 }
 
 #-------------------------------------------------------------
@@ -192,22 +178,20 @@ function my_ip() # Get IP adress on ethernet.
 # Misc utilities:
 #-------------------------------------------------------------
 
-function repeat()       # Repeat n times command.
-{
-    local i max
-    max=$1; shift;
-    for ((i=1; i <= max ; i++)); do  # --> C-like syntax
-        eval "$@";
-    done
+function repeat() {       # Repeat n times command.
+	local i max
+	max=$1; shift;
+	for ((i=1; i <= max ; i++)); do  # --> C-like syntax
+		eval "$@";
+	done
 }
 
-function ask()          # See 'killps' for example of use.
-{
-    echo -n "$@" '[y/n] ' ; read ans
-    case "$ans" in
-        y*|Y*) return 0 ;;
-        *) return 1 ;;
-    esac
+function ask() {          # See 'killps' for example of use.
+	echo -n "$@" '[y/n] ' ; read ans
+	case "$ans" in
+		y*|Y*) return 0 ;;
+		*) return 1 ;;
+	esac
 }
 
 #=========================================================================
@@ -223,9 +207,9 @@ function ask()          # See 'killps' for example of use.
 #=========================================================================
 
 if [ "${BASH_VERSION%.*}" \< "3.0" ]; then
-    echo "You will need to upgrade to version 3.0 for full \
-          programmable completion features"
-    return
+	echo "You will need to upgrade to version 3.0 for full \
+		  programmable completion features"
+	return
 fi
 
 shopt -s extglob        # Necessary.

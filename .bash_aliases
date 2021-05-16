@@ -51,7 +51,7 @@ alias libpath='echo -e ${LD_LIBRARY_PATH//:/\\n}'
 alias du='du -kh'    # Makes a more readable output.
 alias df='df -kTh'
 
-alias grep="grep -s --color=always"
+alias grep="grep -s"
 alias ..="cd ../"
 alias ...="cd ../.."
 alias ....="cd ../../.."
@@ -60,5 +60,3 @@ alias vi="vim"
 alias lt="find -maxdepth 1 -type f -mtime -1"
 alias trash="trashit"
 alias back="backit"
-alias todo="todo.sh"
-alias open="xdg-open"
