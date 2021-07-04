@@ -1,6 +1,0 @@
-#!/bin/bash
-kitty_dir=/opt/kitty.app
-kitty_desktop=/usr/share/applications/kitty.desktop
-curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin launch=n dest=/opt
-rm -f  ~/.local/bin/kitty
-ln -s $kitty_dir/bin/kitty ~/.local/bin/
