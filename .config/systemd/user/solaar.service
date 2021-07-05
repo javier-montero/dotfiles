@@ -1,0 +1,10 @@
+[Unit]
+Description=solaar
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/solaar
+ExecStop=/usr/bin/pkill solaar
+
+[Install]
+WantedBy=graphical-session.target
