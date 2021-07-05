@@ -4,7 +4,7 @@ set nocompatible
 
 "THEME
 set termguicolors
-let g:sonokai_style='shusia'
+let g:sonokai_style='andromeda'
 let g:sonokai_transparent_background=0
 colorscheme sonokai
 
@@ -12,6 +12,7 @@ let g:pathogen_disabled = []
 call add(g:pathogen_disabled, 'vim-coloresque')
 call add(g:pathogen_disabled, 'syntastic')
 call add(g:pathogen_disabled, 'vim-gitgutter')
+call add(g:pathogen_disabled, 'goyo')
 execute pathogen#infect()
 
 "Terminal
