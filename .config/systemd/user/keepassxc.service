@@ -1,0 +1,11 @@
+[Unit]
+Description=keepassxc
+
+[Service]
+Type=simple
+ConditionPathExists=/mnt/backups/notebook/default.kdbx
+ExecStart=/usr/bin/keepassxc /mnt/backups/notebook/default.kdbx
+ExecStop=/usr/bin/pkill keepassxc
+
+[Install]
+WantedBy=graphical-session.target
