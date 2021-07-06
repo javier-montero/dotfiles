@@ -1,4 +1,10 @@
-# Speed up scrolling for the document viewer
-"^chromium$"
-    None, Up, Button4, 7
-    None, Down, Button5, 7
+#find out program name with xprop WM_CLASS | grep -o '"[^"]*"' | head -n 1
+"^firefox$"
+    None, Up, Button4, 5
+    None, Down, Button5, 3
+"^freetube$"
+    None, Up, Button4, 5
+    None, Down, Button5, 3
+"^minecraft$"
+    None, Up, Button4, 4
+    None, Down, Button5, 3
