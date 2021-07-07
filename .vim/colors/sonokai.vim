@@ -56,10 +56,10 @@ if s:configuration.style ==# 'shusia'
 elseif s:configuration.style ==# 'andromeda'
   let s:palette = {
         \ 'black':      ['#181a1c',   '237',  'DarkGrey'],
-        \ 'bg0':        ['#2b2d37',   '235',  'Black'],
+        \ 'bg0':        ['#2e3440',   '235',  'Black'],
         \ 'bg1':        ['#2f323e',   '236',  'DarkGrey'],
         \ 'bg2':        ['#363a49',   '236',  'DarkGrey'],
-        \ 'bg3':        ['#3a3e4e',   '237',  'DarkGrey'],
+        \ 'bg3':        ['#4c566a',   '237',  'DarkGrey'],
         \ 'bg4':        ['#404455',   '237',  'Grey'],
         \ 'bg_red':     ['#ff6188',   '203',  'Red'],
         \ 'diff_red':   ['#473536',   '52',   'DarkRed'],
