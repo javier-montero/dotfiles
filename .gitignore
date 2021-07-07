@@ -18,9 +18,11 @@ Desktop
 .steampath
 .steampid
 .themes
+.torrc
 .var
 .viminfo
 .local
 .config
-
-
+.win32
+.win64
+Projects
