@@ -1,0 +1,30 @@
+[user]
+	email = javier@javier.sh
+	name = Javier Montero
+[color]
+	ui = true
+[core]
+	pager = less
+	autocrlf = false
+	safecrlf = false
+	symlinks = true
+	editor = vim
+[status]
+	showuntrackedfiles = all
+[diff]
+	tool = vimdiff
+[difftool]
+	prompt = false
+[alias]
+	d = difftool
+	s = difftool HEAD^ HEAD
+	ll = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --numstat
+	ld = log --pretty=format:"%C(yellow)%h\\ %C(green)%ad%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --date=short --graph
+	ls = log --pretty=format:"%C(green)%h\\ %C(yellow)[%ad]%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --date=relative
+	bdiff = "!bdiff() { git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)%Creset' --abbrev-commit --date=relative \"$1\"...\"$2\" -X; }; bdiff"
+	mlog = "!mlog() { if [ \"$#\" -eq 1 ]; then git log --stat \"${@: -1}^..${@: -1}\"; else git log ${@:1:$#-1} \"${@: -1}^..${@: -1}\";fi; }; mlog"
+	mdiff= "!mdiff() { if [ \"$#\" -eq 1 ]; then git log --merges $1^ $1; elif [ \"$#\" -eq 2 ]; then git log --merges $2 $1; else echo "Usage: git mdiff [merge SHA2] [merge SHA1]"; echo "OR"; echo "git mdiff [merge SHA1]"; fi; }; mdiff"
+	alias = ! git config --get-regexp ^alias\\. | sed -e s/^alias\\.// -e s/\\ /\\ =\\ /
+[mergetool]
+	keepBackup = false
+

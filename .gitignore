@@ -1,8 +1,4 @@
 .bash_history
-tmp
-projects
-Downloads
-Desktop
 .cache
 .cargo
 .gnupg
@@ -14,6 +10,7 @@ Desktop
 .npmrc
 .pki
 .pulse-cookie
+.ssh
 .steam
 .steampath
 .steampid
@@ -25,4 +22,8 @@ Desktop
 .config
 .win32
 .win64
+.cups
+Desktop
+Downloads
 Projects
+tmp
