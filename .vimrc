@@ -35,6 +35,14 @@ set noexpandtab
 set list
 set listchars=tab:>.,trail:.,extends:#,nbsp:.
 
+"If you do more filetype-specific configs, replace with .vim/after/*
+"SPELL CHECK
+autocmd FileType md set spell
+autocmd FileType txt set spell
+set spellfile=~/.vim/spell/javi.utf-8.add
+set spell spelllang=en_us
+
+"MISC SETTINGS
 set backspace=indent,eol,start
 set nonumber
 set showcmd
