@@ -31,5 +31,9 @@
 * IMWheel:
 	* Config: .imwheelrc
 	* Autostart: .config/systemd/user/imwheel.service
-* Solaar:
-	* Autostart: .config/systemd/user/solaar.service
+
+## Browser: Firefox:
+* Config
+	* .mozilla/firefox/$profile/user-overrides.js
+		* move to actual profile location
+	* [user.js](https://github.com/arkenfox/user.js/)
