@@ -1,0 +1,9 @@
+#!/bin/bash
+
+if [ "$#" != "1" ]
+then
+	echo "usage track_ignored [file]"
+	exit
+fi
+
+git update-index --no-assume-unchanged $1

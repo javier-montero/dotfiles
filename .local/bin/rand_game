@@ -1,0 +1,4 @@
+#!/bin/bash
+
+if [ "$#" != "1" ]; then exit; fi
+ls /mnt/games/*/$1/roms 2>/dev/null | shuf -n 10
