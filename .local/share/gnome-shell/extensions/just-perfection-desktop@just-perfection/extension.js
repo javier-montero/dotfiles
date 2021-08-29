@@ -1,7 +1,10 @@
-const Me = imports.misc.extensionUtils.getCurrentExtension();
-const {API, Settings, Manager, HotCorner} = Me.imports.lib;
-const {GLib, Gio, St, Clutter} = imports.gi;
+const ExtensionUtils = imports.misc.extensionUtils;
+const Me = ExtensionUtils.getCurrentExtension();
 
+const {API, Manager, HotCorner} = Me.imports.lib;
+const {GLib, Gio, St, Clutter, Meta} = imports.gi;
+
+const Util = imports.misc.util;
 const Config = imports.misc.config;
 const ShellVersion = parseFloat(Config.PACKAGE_VERSION);
 
@@ -14,25 +17,22 @@ const WorkspaceThumbnail = imports.ui.workspaceThumbnail;
 const SearchController = (ShellVersion >= 40) ? imports.ui.searchController : null;
 const Panel = imports.ui.panel;
 const WorkspacesView = imports.ui.workspacesView;
-
+const WindowPreview = (ShellVersion >= 3.38) ? imports.ui.windowPreview : null;
+const Workspace = imports.ui.workspace;
 
 let manager;
 let api;
-
 
 function init() {}
 
 function enable()
 {
     // <3.36 can crash by enabling the extension
-    // since <3.36 is not supported we simply throw error
-    // to avoid bad experience for <3.36 users. 
+    // since <3.36 is not supported we simply return
+    // to avoid bad experience for <3.36 users.
     if (ShellVersion < 3.36) {
-        throw new Error('GNOME Shell is not Supported');
+        return;
     }
-    
-    let schemasFolderPath = Me.dir.get_child("schemas").get_path();
-    let schemaID = Me.metadata['schema-id'];
 
     let interfaceSettings = new Gio.Settings({schema_id: 'org.gnome.desktop.interface'});
     
@@ -51,11 +51,15 @@ function enable()
         'GLib': GLib,
         'Clutter': Clutter,
         'Panel': Panel,
+        'WindowPreview' : WindowPreview,
+        'Workspace' : Workspace,
+        'Util' : Util,
+        'Meta' : Meta,
     }, ShellVersion);
     
     api.open();
     
-    let settings = Settings.getSettings(Gio, schemaID, schemasFolderPath);
+    let settings = ExtensionUtils.getSettings(Me.metadata['settings-schema']);
     let hotCorner = new HotCorner.HotCorner({ 'API': api, 'St': St });
     
     manager = new Manager.Manager({
@@ -70,8 +74,8 @@ function enable()
 
 function disable()
 {
-    manager.revertAll();
+    (manager) && manager.revertAll();
     manager = null;
-    api.close();
+    (api) && api.close();
 }
 

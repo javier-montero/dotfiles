@@ -2,7 +2,7 @@
  * Prefs Library
  * 
  * @author     Javad Rahmatzadeh <j.rahmatzadeh@gmail.com>
- * @copyright  2021
+ * @copyright  2020-2021
  * @license    GNU General Public License v3.0
  */
 
@@ -77,6 +77,7 @@ var Prefs = class
         this._setKey('visiblity', 'show-apps-button', 'GtkSwitch', true);
         this._setKey('visiblity', 'workspaces-in-app-grid', 'GtkSwitch',
             this._shellVersion >= 40);
+        this._setKey('visiblity', 'window-preview-caption', 'GtkSwitch', true);
             
         // icons
         this._setKey('icons', 'app-menu-icon', 'GtkSwitch', true);
@@ -100,8 +101,11 @@ var Prefs = class
             this._shellVersion >= 40);
         this._setKey('behavior', 'startup-status', 'GtkComboBoxText',
             this._shellVersion >= 40);
+        this._setKey('behavior', 'workspace-wrap-around', 'GtkSwitch', true);
         
         // customize
+        this._setKey('customize', 'workspace-background-corner-size', 'GtkComboBoxText',
+            this._shellVersion >= 40);
         this._setKey('customize', 'top-panel-position', 'GtkComboBoxText', true);
         this._setKey('customize', 'panel-corner-size', 'GtkComboBoxText', true);
         this._setKey('customize', 'clock-menu-position', 'GtkComboBoxText', true);
@@ -116,6 +120,8 @@ var Prefs = class
         });
         this._setKey('customize', 'notification-banner-position', 'GtkComboBoxText',
             true);
+        this._setKey('customize', 'panel-size', 'GtkComboBoxText', true);
+        this._setKey('customize', 'panel-button-padding-size', 'GtkComboBoxText', true);
         
         // override
         this._setKey('override', 'theme', 'GtkSwitch', true);
@@ -228,6 +234,7 @@ var Prefs = class
         let pic = this._gtk.Picture.new_for_filename(filePath);
         
         pic.set_size_request(widget.width_request, widget.height_request);
+        
         widget.hide();
         parent.append(pic);
     }
@@ -313,6 +320,8 @@ var Prefs = class
                     key.category, key.name, 'GtkDropDown', key.supported, key.maps);
                 
                 this._dropdowns[newKey.widgetId] = dropdown;
+                
+                dropdown.set_valign(this._gtk.Align.CENTER);
                 
                 widget.hide();
                 parent.append(dropdown);

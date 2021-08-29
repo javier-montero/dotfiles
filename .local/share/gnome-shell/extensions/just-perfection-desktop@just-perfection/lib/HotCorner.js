@@ -2,7 +2,7 @@
  * HotCorner Library
  * 
  * @author     Javad Rahmatzadeh <j.rahmatzadeh@gmail.com>
- * @copyright  2021
+ * @copyright  2020-2021
  * @license    GNU General Public License v3.0
  */
 
@@ -43,8 +43,8 @@ var HotCorner = class
             track_hover : true,
             height : 2,
             width : 2,
-            x : monitorInfo.x,
-            y : monitorInfo.y,
+            x : (monitorInfo) ? monitorInfo.x : 0,
+            y : (monitorInfo) ? monitorInfo.y : 0,
         });
     
         btn.connect("enter-event", () => {

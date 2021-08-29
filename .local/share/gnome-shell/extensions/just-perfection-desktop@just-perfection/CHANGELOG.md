@@ -6,6 +6,33 @@ We go to the next version after each release on [GNOME Shell Extensions website]
 
 ## [Unreleased]
 
+## [13.0.0 Ring] - 2021-08-10
+
+### Changed
+
+- Search button position in prefs window.
+
+### Fixed
+
+- Unwanted window demands attention focus.
+- API.monitorGetInfo for "pMonitor is null" error.
+- Dropdown align in preferences dialog.
+- Startup status blocking shortcut keys.
+- Accessing dash in case the original dash has been removed by third party extensions.
+- Russian translation by [@librusekus35790](https://gitlab.gnome.org/librusekus35790).
+
+### Removed
+
+- Settings and Translation library and using ExtensionUtils instead.
+
+### Added
+
+- Panel height.
+- Panel button padding size.
+- Window picker caption visiblity.
+- Workspace background corner size in overview.
+- Workspace wraparound (modified version of WorkspaceSwitcherWrapAround by [@war1025](https://github.com/war1025)).
+
 ## [12.0.0 Queen Red] - 2021-06-29
 
 ### Changed
@@ -23,7 +50,7 @@ We go to the next version after each release on [GNOME Shell Extensions website]
 ### Added
 
 - Startup status for GNOME Shell 40.
-- Always show workspace switcher on dynamic workspaces
+- Always show workspace switcher on dynamic workspaces.
 - Notification banner position.
 - Workspace animation background color for shell theme override.
 - More descriptions to the preferences dialog.

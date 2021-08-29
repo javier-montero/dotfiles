@@ -2,7 +2,7 @@
  * API Library
  * 
  * @author     Javad Rahmatzadeh <j.rahmatzadeh@gmail.com>
- * @copyright  2021
+ * @copyright  2020-2021
  * @license    GNU General Public License v3.0
  */
  
@@ -10,6 +10,11 @@ const NOTIFICATION_BANNER_POSITION = {
     'TOP_START' : 0,
     'TOP_CENTER' : 1,
     'TOP_END' : 2,
+};
+
+const PANEL_POSITION = {
+    'TOP' : 0,
+    'BOTTOM' : 1,
 };
 
 const PANEL_BOX_POSITION = {
@@ -53,7 +58,11 @@ var API = class
      *   'Gio' reference to Gio
      *   'GLib' reference to GLib
      *   'Clutter' reference to Clutter
-     *   'Panel' reference to ui::Panel
+     *   'Panel' reference to ui::panel
+     *   'WindowPreview' reference to ui::windowPreview
+     *   'Workspace' reference to ui::workspace
+     *   'Util' reference to misc::util
+     *   'Meta' reference to Meta
      * @param float shellVersion
      */
     constructor(dependecies, shellVersion)
@@ -72,6 +81,10 @@ var API = class
         this._glib = dependecies['GLib'] || null;
         this._clutter = dependecies['Clutter'] || null;
         this._panel = dependecies['Panel'] || null;
+        this._windowPreview = dependecies['WindowPreview'] || null;
+        this._workspace = dependecies['Workspace'] || null;
+        this._util = dependecies['Util'] || null;
+        this._meta = dependecies['Meta'] || null;
         
         this._shellVersion = shellVersion;
         this._originals = {};
@@ -105,7 +118,7 @@ var API = class
      */
     close()
     {
-        this.UIstyleClassRemove(this._getAPIClassname('shell-version'));
+        this.UIStyleClassRemove(this._getAPIClassname('shell-version'));
         this._startSearchSignal(false);
     }
     
@@ -130,6 +143,9 @@ var API = class
      *  activities-button-icon-monochrome
      *  activities-button-no-label
      *  dash-icon-size
+     *  panel-button-padding-size
+     *  no-window-preview
+     *  workspace-background-radius-size
      *
      * @return string
      */
@@ -155,6 +171,9 @@ var API = class
             'activities-button-icon-monochrome',
             'activities-button-no-label',
             'dash-icon-size',
+            'panel-button-padding-size',
+            'no-window-preview',
+            'workspace-background-radius-size',
         ];
         
         if (!possibleTypes.includes(type)) {
@@ -179,7 +198,7 @@ var API = class
         let classnameStarter = this._getAPIClassname('panel-corner');
         
         for (let size = 0; size <= 60; size++) {
-            this.UIstyleClassRemove(classnameStarter + size);
+            this.UIStyleClassRemove(classnameStarter + size);
         }
     }
     
@@ -204,20 +223,85 @@ var API = class
     }
     
     /**
+     * set panel size to default
+     *
+     * @return void
+     */
+    panelSetDefaultSize()
+    {
+        if (!this._originals['panelHeight']) {
+            return;
+        }
+        
+        this.panelSetSize(this._originals['panelHeight'], false);
+    }
+    
+    /**
+     * change panel size
+     *
+     * @param int size 0 to 100
+     * @param fake bool true means it shouldn't change the last size,
+     *   false otherwise
+     *
+     * @return void
+     */
+    panelSetSize(size, fake)
+    {
+        if (!this._originals['panelHeight']) {
+            this._originals['panelHeight'] = this._main.panel.height;
+        }
+        
+        if (size > 100 || size < 0) {
+            return;
+        }
+        
+        this._main.panel.height = size;
+        
+        if (!fake) {
+            this._panelSize = size;
+        }
+        
+        // to fix bottom panel not geting out of the display area
+        if (this.panelGetPosition() === PANEL_POSITION.BOTTOM) {
+            this.panelSetPosition(PANEL_POSITION.BOTTOM);
+        }
+    }
+    
+    /**
+     * get the last size of the panel
+     *
+     * @return int
+     */
+    panelGetSize()
+    {
+        if (typeof this._panelSize !== 'undefined') {
+            return this._panelSize;
+        }
+        
+        if (this._originals['panelHeight']) {
+            return this._originals['panelHeight'];
+        }
+        
+        return this._main.panel.height;
+    }
+    
+    /**
      * show panel
      *
      * @return void
      */
     panelShow()
     {
-        if (!this._originals['panelHeight']) {
+        let classname = this._getAPIClassname('no-panel');
+    
+        if (!this.UIstyleClassContain(classname)) {
             return;
         }
         
         this._main.panel.show();
-        this._main.panel.height = this._originals['panelHeight'];
+        this.panelSetSize(this.panelGetSize(), false);
         
-        this.UIstyleClassRemove(this._getAPIClassname('no-panel'));
+        this.UIStyleClassRemove(classname);
     }
     
     /**
@@ -227,19 +311,21 @@ var API = class
      */
     panelHide()
     {
-        if (!this._originals['panelHeight']) {
-            this._originals['panelHeight'] = this._main.panel.height;
+        let classname = this._getAPIClassname('no-panel');
+    
+        if (this.UIstyleClassContain(classname)) {
+            return;
         }
         
         this._main.panel.hide();
-        this._main.panel.height = 0;
+        this.panelSetSize(0, true);
         
         // when panel is hidden and search entry is visible,
         // the search entry gets too close to the top, so we fix it with margin
         // on GNOME 3 we need to have top and bottom margin for correct proportion
         // but on GNOME 40 we don't need to keep proportion but give it more
         // top margin to keep it less close to top
-        this.UIstyleClassAdd(this._getAPIClassname('no-panel'));
+        this.UIstyleClassAdd(classname);
     }
     
     /**
@@ -253,12 +339,28 @@ var API = class
     }
     
     /**
+     * check whether dash is visible
+     *
+     * @return bool
+     */
+    isDashVisible()
+    {
+        return typeof this._dashVisiblity === 'undefined' || this._dashVisiblity;
+    }
+    
+    /**
      * show dash
      *
      * @return void
      */
     dashShow()
     {
+        if (!this._main.overview.dash || this.isDashVisible()) {
+            return;
+        }
+        
+        this._dashVisiblity = true;
+        
         this._main.overview.dash.show();
         
         if (this._shellVersion >= 40) {
@@ -277,6 +379,12 @@ var API = class
      */
     dashHide()
     {
+        if (!this._main.overview.dash || !this.isDashVisible()) {
+            return;
+        }
+        
+        this._dashVisiblity = false;
+    
         this._main.overview.dash.hide();
         
         if (this._shellVersion >= 40) {
@@ -325,7 +433,7 @@ var API = class
      *
      * @return void
      */
-    UIstyleClassRemove(classname)
+    UIStyleClassRemove(classname)
     {
         this._main.layoutManager.uiGroup.remove_style_class_name(classname);
     }
@@ -382,7 +490,7 @@ var API = class
      */
     searchEntryShow(fake)
     {
-        this.UIstyleClassRemove(this._getAPIClassname('no-search'));
+        this.UIStyleClassRemove(this._getAPIClassname('no-search'));
         
         this._main.overview.searchEntry.show();
         
@@ -508,7 +616,7 @@ var API = class
                 this.UIstyleClassAdd(this._getAPIClassname('type-to-search'));
                 this.searchEntryShow(true);
             } else {
-                this.UIstyleClassRemove(this._getAPIClassname('type-to-search'));
+                this.UIStyleClassRemove(this._getAPIClassname('type-to-search'));
                 this.searchEntryHide(true);
             }
         });
@@ -598,7 +706,7 @@ var API = class
         
         // it should be before setting the switcher size
         // because the size can be changed by removing the api class
-        this.UIstyleClassRemove(this._getAPIClassname('no-workspace'));
+        this.UIStyleClassRemove(this._getAPIClassname('no-workspace'));
         
         if (this._workspaceSwitcherLastSize) {
             this.workspaceSwitcherSetSize(this._workspaceSwitcherLastSize, false);
@@ -977,7 +1085,7 @@ var API = class
             return;
         }
         
-        this.UIstyleClassRemove(this._getAPIClassname('no-window-picker-icon'));
+        this.UIStyleClassRemove(this._getAPIClassname('no-window-picker-icon'));
     }
     
     /**
@@ -1001,7 +1109,7 @@ var API = class
      */
     powerIconShow()
     {
-        this.UIstyleClassRemove(this._getAPIClassname('no-power-icon'));
+        this.UIStyleClassRemove(this._getAPIClassname('no-power-icon'));
     }
     
     /**
@@ -1017,7 +1125,7 @@ var API = class
     /**
      * get primary monitor information
      *
-     * @return object
+     * @return false when monitor does not exist | object
      *  x: int
      *  y: int
      *  width: int
@@ -1027,6 +1135,10 @@ var API = class
     monitorGetInfo()
     {
         let pMonitor = this._main.layoutManager.primaryMonitor;
+        
+        if (!pMonitor) {
+            return false;
+        }
         
         return {
             'x': pMonitor.x,
@@ -1038,9 +1150,23 @@ var API = class
     }
     
     /**
+     * get panel position
+     *
+     * @return int see PANEL_POSITION
+     */
+    panelGetPosition()
+    {
+        if (typeof this._panelPosition === 'undefined') {
+            return PANEL_POSITION.TOP;
+        }
+        
+        return this._panelPosition;
+    }
+    
+    /**
      * move panel position
      *
-     * @param string position 'top', 'bottom'
+     * @param int position see PANEL_POSITION
      *
      * @return void
      */
@@ -1050,30 +1176,34 @@ var API = class
         // while they are fixing the drop shadow issue they can create wrong
         // height when panel is going enable or disable
         
-        if (!this._originals['panelHeight']) {
-            this._originals['panelHeight'] = this._main.panel.height;
-        }
-        
         let monitorInfo = this.monitorGetInfo();
         let panelBox = this._main.layoutManager.panelBox;
         
-        if (position === 'top') {
+        if (position === PANEL_POSITION.TOP) {
+            this._panelPosition = PANEL_POSITION.TOP;
             if (this._workareasChangedSignal) {
                 global.display.disconnect(this._workareasChangedSignal);
+                this._workareasChangedSignal = null;
             }
-            let topX = monitorInfo.x;
-            let topY = monitorInfo.y;
+            let topX = (monitorInfo) ? monitorInfo.x : 0;
+            let topY = (monitorInfo) ? monitorInfo.y : 0;
             panelBox.set_position(topX, topY);
-            this.UIstyleClassRemove(this._getAPIClassname('bottom-panel'));
+            this.UIStyleClassRemove(this._getAPIClassname('bottom-panel'));
             //this._panelBoxHeightSetDefault();
             return;
         }
         
-        let BottomX = monitorInfo.x;
-        let BottomY = monitorInfo.height - this._originals['panelHeight'];
+        this._panelPosition = PANEL_POSITION.BOTTOM;
         
-        panelBox.set_position(BottomX, BottomY);
-        this.UIstyleClassAdd(this._getAPIClassname('bottom-panel'));
+        // only change it when a monitor detected
+        // 'workareas-changed' signal will do the job on next monitor detection
+        if (monitorInfo) {
+            let BottomX = monitorInfo.x;
+            let BottomY = monitorInfo.height - this.panelGetSize();
+            
+            panelBox.set_position(BottomX, BottomY);
+            this.UIstyleClassAdd(this._getAPIClassname('bottom-panel'));
+        }
         
         if (!this._workareasChangedSignal) {
             this._workareasChangedSignal
@@ -1149,7 +1279,7 @@ var API = class
             return;
         }
         
-        this.UIstyleClassRemove(this._getAPIClassname('no-panel-arrow'));
+        this.UIStyleClassRemove(this._getAPIClassname('no-panel-arrow'));
     }
     
     /**
@@ -1173,7 +1303,7 @@ var API = class
      */
     panelNotificationIconEnable()
     {
-        this.UIstyleClassRemove(this._getAPIClassname('no-panel-notification-icon'));
+        this.UIStyleClassRemove(this._getAPIClassname('no-panel-notification-icon'));
     }
     
     /**
@@ -1193,7 +1323,7 @@ var API = class
      */
     appMenuIconEnable()
     {
-        this.UIstyleClassRemove(this._getAPIClassname('no-app-menu-icon'));
+        this.UIStyleClassRemove(this._getAPIClassname('no-app-menu-icon'));
     }
     
     /**
@@ -1260,6 +1390,10 @@ var API = class
      */
     showAppsButtonEnable()
     {
+        if (!this._main.overview.dash) {
+            return;
+        }
+    
         let container = this._main.overview.dash.showAppsButton.get_parent();
         container.remove_style_class_name(this._getAPIClassname('no-show-apps-button'));
     }
@@ -1271,6 +1405,10 @@ var API = class
      */
     showAppsButtonDisable()
     {
+        if (!this._main.overview.dash) {
+            return;
+        }
+        
         let container = this._main.overview.dash.showAppsButton.get_parent();
         container.add_style_class_name(this._getAPIClassname('no-show-apps-button'));
     }
@@ -1452,7 +1590,7 @@ var API = class
             activities.add_actor(activities.label_actor);
         }
         
-        this.UIstyleClassRemove(this._getAPIClassname('activities-button-no-label'));
+        this.UIStyleClassRemove(this._getAPIClassname('activities-button-no-label'));
     }
 
     /**
@@ -1468,6 +1606,9 @@ var API = class
     
         this._displayWindowDemandsAttentionSignal
         = global.display.connect('window-demands-attention', (display, window) => {
+            if (!window || window.has_focus() || window.is_skip_taskbar()) {
+                return;
+            }
             this._main.activateWindow(window);
         });
         
@@ -1507,6 +1648,10 @@ var API = class
     startupStatusSet(status)
     {
         if (this._shellVersion < 40) {
+            return;
+        }
+        
+        if (!this._main.layoutManager._startingUp) {
             return;
         }
     
@@ -1561,7 +1706,7 @@ var API = class
         let classnameStarter = this._getAPIClassname('dash-icon-size');
         
         DASH_ICON_SIZES.forEach((size) => {
-            this.UIstyleClassRemove(classnameStarter + size);
+            this.UIStyleClassRemove(classnameStarter + size);
         });
     }
     
@@ -1720,6 +1865,230 @@ var API = class
         
         let ThumbnailsBoxProto = this._workspaceThumbnail.ThumbnailsBox.prototype;
         ThumbnailsBoxProto._updateShouldShow = this._originals['updateShouldShow'];
+    }
+    
+    /**
+     * emit panel button style changed
+     *
+     * @return void
+     */
+    _panelButtonEmitStyleChanged()
+    {
+        // @TODO since this is a hack we should find a good way
+        // to trigger PanelMenu.ButtonBox style-changed 
+        if (!this.isPanelVisible()) {
+            return;
+        }
+        
+        this.panelHide();
+        this.panelShow();
+    }
+    
+    /**
+     * set panel button hpadding to default
+     *
+     * @return void
+     */
+    panelButtonHpaddingSetDefault()
+    {
+        if (typeof this._panelButtonHpaddingSize === 'undefined') {
+            return;
+        }
+    
+        let classnameStarter = this._getAPIClassname('panel-button-padding-size');
+        this.UIStyleClassRemove(classnameStarter + this._panelButtonHpaddingSize);
+        this._panelButtonEmitStyleChanged();
+        
+        delete(this._panelButtonHpaddingSize);
+    }
+    
+    /**
+     * set panel button hpadding size
+     *
+     * @param int size in pixels (0 - 60)
+     *
+     * @return void
+     */
+    panelButtonHpaddingSizeSet(size)
+    {
+        this.panelButtonHpaddingSetDefault();
+        
+        if (size < 0 || size > 60) {
+            return;
+        }
+        
+        this._panelButtonHpaddingSize = size;
+        
+        let classnameStarter = this._getAPIClassname('panel-button-padding-size');
+        this.UIstyleClassAdd(classnameStarter + size);
+        this._panelButtonEmitStyleChanged();
+    }
+    
+    /**
+     * get window preview prototype
+     *
+     * @return object
+     */
+    _windowPreviewGetPrototype()
+    {
+        if (this._shellVersion <= 3.36) {
+            return this._workspace.WindowOverlay.prototype;
+        }
+    
+        return this._windowPreview.WindowPreview.prototype;
+    }
+    
+    /**
+     * enable window preview caption
+     *
+     * @return void
+     */
+    windowPreviewCaptionEnable()
+    {
+        if (!this._originals['windowPreviewGetCaption']) {
+            return;
+        }
+        
+        let windowPreviewProto = this._windowPreviewGetPrototype();
+        windowPreviewProto._getCaption = this._originals['windowPreviewGetCaption'];
+        
+        this.UIStyleClassRemove(this._getAPIClassname('no-window-preview'));
+    }
+    
+    /**
+     * disable window preview caption
+     *
+     * @return void
+     */
+    windowPreviewCaptionDisable()
+    {
+        let windowPreviewProto = this._windowPreviewGetPrototype();
+        
+        if (!this._originals['windowPreviewGetCaption']) {
+            this._originals['windowPreviewGetCaption'] = windowPreviewProto._getCaption;
+        }
+    
+        windowPreviewProto._getCaption = () => {
+            return '';
+        };
+        
+        this.UIstyleClassAdd(this._getAPIClassname('no-window-preview'));
+    }
+    
+    /**
+     * set workspace background border radius to default size
+     *
+     * @return void
+     */
+    workspaceBackgroundRadiusSetDefault()
+    {
+        if (typeof this._workspaceBackgroundRadiusSize === 'undefined') {
+            return;
+        }
+        
+        let workspaceBackgroundProto = this._workspace.WorkspaceBackground.prototype;
+        
+        workspaceBackgroundProto._updateBorderRadius
+        = this._originals['workspaceBackgroundUpdateBorderRadius'];
+        
+    
+        let classnameStarter = this._getAPIClassname('workspace-background-radius-size');
+        this.UIStyleClassRemove(classnameStarter + this._workspaceBackgroundRadiusSize);
+        
+        delete(this._workspaceBackgroundRadiusSize);
+    }
+    
+    /**
+     * set workspace background border radius size
+     *
+     * @param int size in pixels (0 - 60)
+     *
+     * @return void
+     */
+    workspaceBackgroundRadiusSet(size)
+    {
+        if (this._shellVersion < 40) {
+            return;
+        }
+        
+        if (size < 0 || size > 60) {
+            return;
+        }
+        
+        this.workspaceBackgroundRadiusSetDefault();
+        
+        let workspaceBackgroundProto = this._workspace.WorkspaceBackground.prototype;
+        
+        if (!this._originals['workspaceBackgroundUpdateBorderRadius']) {
+            this._originals['workspaceBackgroundUpdateBorderRadius']
+            = workspaceBackgroundProto._updateBorderRadius;
+        }
+        
+        const Util = this._util;
+        const St = this._st;
+        
+        workspaceBackgroundProto._updateBorderRadius = function() {
+            const { scaleFactor } = St.ThemeContext.get_for_stage(global.stage);
+            const cornerRadius = scaleFactor * size;
+
+            const backgroundContent = this._bgManager.backgroundActor.content;
+            backgroundContent.rounded_clip_radius = 
+                Util.lerp(0, cornerRadius, this._stateAdjustment.value);
+        }
+        
+        this._workspaceBackgroundRadiusSize = size;
+        
+        let classnameStarter = this._getAPIClassname('workspace-background-radius-size');
+        this.UIstyleClassAdd(classnameStarter + size);
+    }
+    
+    /**
+     * enable workspace wraparound
+     *
+     * @return void
+     */
+    workspaceWraparoundEnable()
+    {
+        let metaWorkspaceProto = this._meta.Workspace.prototype;
+        
+        if (!this._originals['metaWorkspaceGetNeighbor']) {
+            this._originals['metaWorkspaceGetNeighbor']
+            = metaWorkspaceProto.get_neighbor;
+        }
+        
+        const Meta = this._meta;
+        
+        metaWorkspaceProto.get_neighbor = function (dir) {
+            
+            let index = this.index();
+            let lastIndex = global.workspace_manager.n_workspaces - 1;
+            let neighborIndex;
+            
+	        if (dir === Meta.MotionDirection.UP || dir === Meta.MotionDirection.LEFT) {
+	            // prev
+	            neighborIndex = (index > 0) ? index - 1 : lastIndex;
+	        } else {
+	            // next
+		        neighborIndex = (index < lastIndex) ? index + 1 : 0;
+	        }
+	        
+	        return global.workspace_manager.get_workspace_by_index(neighborIndex);
+        };
+    }
+    
+    /**
+     * disable workspace wraparound
+     *
+     * @return void
+     */
+    workspaceWraparoundDisable()
+    {
+        if (!this._originals['metaWorkspaceGetNeighbor']) {
+            return;
+        }
+        
+        let metaWorkspaceProto = this._meta.Workspace.prototype;
+        metaWorkspaceProto.get_neighbor = this._originals['metaWorkspaceGetNeighbor'];
     }
 }
 

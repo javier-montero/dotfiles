@@ -2,7 +2,7 @@
  * Manager Library
  * 
  * @author     Javad Rahmatzadeh <j.rahmatzadeh@gmail.com>
- * @copyright  2021
+ * @copyright  2020-2021
  * @license    GNU General Public License v3.0
  */
 
@@ -188,6 +188,26 @@ var Manager = class
         this._settings.connect('changed::workspace-switcher-should-show', () => {
             this._applyWorkspaceSwitcherShouldShow(false);
         });
+        
+        this._settings.connect('changed::panel-size', () => {
+            this._applyPanelSize(false);
+        });
+        
+        this._settings.connect('changed::panel-button-padding-size', () => {
+            this._applyPanelButtonPaddingSize(false);
+        });
+        
+        this._settings.connect('changed::window-preview-caption', () => {
+            this._applyWindowPreviewCaption(false);
+        });
+        
+        this._settings.connect('changed::workspace-background-corner-size', () => {
+            this._applyWorkspaceBackgroundCornerSize(false);
+        });
+        
+        this._settings.connect('changed::workspace-wrap-around', () => {
+            this._applyWorkspaceWrapAround(false);
+        });
     }
     
     
@@ -233,6 +253,11 @@ var Manager = class
         this._applyWorkspacesInAppGrid(false);
         this._applyNotificationBannerPosition(false);
         this._applyWorkspaceSwitcherShouldShow(false);
+        this._applyPanelSize(false);
+        this._applyPanelButtonPaddingSize(false);
+        this._applyWindowPreviewCaption(false);
+        this._applyWorkspaceBackgroundCornerSize(false);
+        this._applyWorkspaceWrapAround(false);
     }
     
     /**
@@ -277,6 +302,11 @@ var Manager = class
         this._applyWorkspacesInAppGrid(true);
         this._applyNotificationBannerPosition(true);
         this._applyWorkspaceSwitcherShouldShow(true);
+        this._applyPanelSize(true);
+        this._applyPanelButtonPaddingSize(true);
+        this._applyWindowPreviewCaption(true);
+        this._applyWorkspaceBackgroundCornerSize(true);
+        this._applyWorkspaceWrapAround(true);
     }
     
     /**
@@ -466,8 +496,8 @@ var Manager = class
         let fallbackClassName = 'just-perfection-gnome3';
         
         if (forceOriginal || !this._settings.get_boolean('theme')) {
-            this._api.UIstyleClassRemove(className);
-            this._api.UIstyleClassRemove(fallbackClassName);
+            this._api.UIStyleClassRemove(className);
+            this._api.UIStyleClassRemove(fallbackClassName);
         } else {
             this._api.UIstyleClassAdd(className);
             if (this._shellVersion < 40) {
@@ -650,9 +680,9 @@ var Manager = class
     _applyTopPanelPosition(forceOriginal)
     {
         if (forceOriginal || this._settings.get_int('top-panel-position') === 0) {
-            this._api.panelSetPosition('top');
+            this._api.panelSetPosition(0);
         } else {
-            this._api.panelSetPosition('bottom');
+            this._api.panelSetPosition(1);
         }
     }
     
@@ -899,6 +929,96 @@ var Manager = class
             this._api.workspaceSwitcherShouldShowSetDefault();
         } else {
             this._api.workspaceSwitcherShouldShowSetAlways();
+        }
+    }
+    
+    /**
+     * apply panel size settings
+     *
+     * @param bool forceOriginal
+     *
+     * @return void
+     */
+    _applyPanelSize(forceOriginal)
+    {
+        let size = this._settings.get_int('panel-size');
+        
+        if (forceOriginal || size === 0) {
+            this._api.panelSetDefaultSize();
+        } else {
+            this._api.panelSetSize(size, false);
+        }
+    }
+    
+    /**
+     * apply panel button padding size settings
+     *
+     * @param bool forceOriginal
+     *
+     * @return void
+     */
+    _applyPanelButtonPaddingSize(forceOriginal)
+    {
+        let size = this._settings.get_int('panel-button-padding-size');
+        
+        if (forceOriginal || size === 0) {
+            this._api.panelButtonHpaddingSetDefault();
+        } else {
+            this._api.panelButtonHpaddingSizeSet(size - 1);
+        }
+    }
+    
+    /**
+     * apply window preview caption settings
+     *
+     * @param bool forceOriginal
+     *
+     * @return void
+     */
+    _applyWindowPreviewCaption(forceOriginal)
+    {
+        let status = this._settings.get_boolean('window-preview-caption');
+        
+        if (forceOriginal || status) {
+            this._api.windowPreviewCaptionEnable();
+        } else {
+            this._api.windowPreviewCaptionDisable();
+        }
+    }
+    
+    /**
+     * apply workspace background corner size settings
+     *
+     * @param bool forceOriginal
+     *
+     * @return void
+     */
+    _applyWorkspaceBackgroundCornerSize(forceOriginal)
+    {
+        let size = this._settings.get_int('workspace-background-corner-size');
+        
+        if (forceOriginal || size === 0) {
+            this._api.workspaceBackgroundRadiusSetDefault();
+        } else {
+            this._api.workspaceBackgroundRadiusSet(size - 1);
+        }
+    }
+    
+    /**
+     * apply workspace wrap around settings
+     *
+     * @param bool forceOriginal
+     *
+     * @return void
+     */
+    _applyWorkspaceWrapAround(forceOriginal)
+    {
+        let status = this._settings.get_boolean('workspace-wrap-around');
+        
+        if (forceOriginal || !status) {
+            this._api.workspaceWraparoundDisable();
+        } else {
+            this._api.workspaceWraparoundEnable();
         }
     }
 }

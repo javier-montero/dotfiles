@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<application-state>
+  <context id="">
+    <application id="com.github.jeromerobert.pdfarranger.desktop" score="7.5" last-seen="1629574262"/>
+    <application id="kitty.desktop" score="1715.61376953125" last-seen="1630202602"/>
+    <application id="solaar.desktop" score="0" last-seen="1629943961"/>
+    <application id="org.gnome.Software.desktop" score="0" last-seen="1629756130"/>
+    <application id="virt-manager.desktop" score="1734.8125" last-seen="1630199794"/>
+    <application id="org.keepassxc.KeePassXC.desktop" score="73.82373046875" last-seen="1630201471"/>
+    <application id="transmission-gtk.desktop" score="23.5" last-seen="1630201318"/>
+    <application id="gnome-control-center.desktop" score="12.55810546875" last-seen="1629943983"/>
+    <application id="io.freetubeapp.FreeTube.desktop" score="13230.0908203125" last-seen="1630202605"/>
+    <application id="mullvad-vpn.desktop" score="2" last-seen="1630029220"/>
+    <application id="firefox.desktop" score="24424.8857421875" last-seen="1630202637"/>
+    <application id="chromium.desktop" score="793" last-seen="1630111740"/>
+    <application id="vlc.desktop" score="4147.5625" last-seen="1630115546"/>
+    <application id="wine-Programs-MusicBee-MusicBee.desktop" score="2232.62744140625" last-seen="1630197465"/>
+    <application id="org.gnome.Calculator.desktop" score="65" last-seen="1630179656"/>
+  </context>
+</application-state>

@@ -23,6 +23,7 @@ This extension allows you to do the following:
 - System Menu (Aggregate Menu)
 - Applications Button
 - Workspaces in app grid (Only GNOME Shell 40)
+- Window Picker Caption
 
 ### Icons Visibility
 
@@ -41,11 +42,15 @@ This extension allows you to do the following:
 - Window Demands Attention Focus
 - Always Show Workspace Switcher on Dynamic Workspaces (Only GNOME Shell 40)
 - Startup status (Only GNOME Shell 40)
+- Workspace Wraparound
 
 ### Customize
 
+- Panel Height
 - Panel Position
+- Panel Button Padding Size
 - Panel Round Corner Size
+- Workspace Background Corner Size in Overview (Only GNOME Shell 40)
 - Clock Menu Position
 - Workspace Switcher Size (Only GNOME Shell 40)
 - Animation Speed or Disable it
@@ -59,6 +64,8 @@ This extension allows you to do the following:
 ## GNOME Shell extensions Website
 
 This extension is also available on [GNOME Shell extensions website](https://extensions.gnome.org/extension/3843/just-perfection/).
+
+[![Just Perfection on extensions.gnome.org](bin/ego.svg)](https://extensions.gnome.org/extension/3843/just-perfection/)
 
 ## GNOME Shell Support
 
