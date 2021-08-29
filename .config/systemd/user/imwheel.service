@@ -5,7 +5,7 @@ After=display-manager.service
 
 [Service]
 Type=simple
-Environment=XAUTHORITY=%h/.Xauthority
+ExecStartPre=/bin/sleep 10
 ExecStart=/usr/bin/imwheel -b "45" -d
 ExecStop=/usr/bin/pkill imwheel
 RemainAfterExit=yes
