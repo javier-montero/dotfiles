@@ -5,8 +5,10 @@
 .gnupg
 .lesshst
 .local/*
+.local/share/gnome-shell/application_state
 .icons
 .java
+.kodi
 .minecraft
 .mozilla
 .notebook
@@ -14,11 +16,13 @@
 .nvidia-settings-rc
 .pki
 .pulse-cookie
+.sqlite_history
 .ssh
 .steam
 .steampath
 .steampid
 .themes
+.tiny-media-manager
 .torrc
 .var
 .viminfo
@@ -28,6 +32,8 @@
 Desktop
 Downloads
 Games
+Notebook
+Pictures
 Projects
 tmp
 
