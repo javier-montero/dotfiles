@@ -143,6 +143,22 @@ var Prefs = class Prefs {
             }
         };
 
+        this.BLUR_WINDOW_LIST = {
+            key: 'blur-window-list',
+            get: function () {
+                return settings.get_boolean(this.key);
+            },
+            set: function (v) {
+                settings.set_boolean(this.key, v);
+            },
+            changed: function (cb) {
+                return settings.connect('changed::' + this.key, cb);
+            },
+            disconnect: function () {
+                return settings.disconnect.apply(settings, arguments);
+            }
+        };
+
         this.HACKS_LEVEL = {
             key: 'hacks-level',
             get: function () {
@@ -175,8 +191,40 @@ var Prefs = class Prefs {
             },
         };
 
+        this.APPFOLDER_DIALOG_OPACITY = {
+            key: 'appfolder-dialog-opacity',
+            get: function () {
+                return settings.get_double(this.key);
+            },
+            set: function (v) {
+                settings.set_double(this.key, v);
+            },
+            changed: function (cb) {
+                return settings.connect('changed::' + this.key, cb);
+            },
+            disconnect: function () {
+                return settings.disconnect.apply(settings, arguments);
+            },
+        };
+
         this.STATIC_BLUR = {
             key: 'static-blur',
+            get: function () {
+                return settings.get_boolean(this.key);
+            },
+            set: function (v) {
+                settings.set_boolean(this.key, v);
+            },
+            changed: function (cb) {
+                return settings.connect('changed::' + this.key, cb);
+            },
+            disconnect: function () {
+                return settings.disconnect.apply(settings, arguments);
+            }
+        };
+
+        this.HIDETOPBAR = {
+            key: 'hidetopbar',
             get: function () {
                 return settings.get_boolean(this.key);
             },

@@ -2,14 +2,13 @@
 // Drive menu extension
 const { Clutter, Gio, GObject, Shell, St } = imports.gi;
 
-const Gettext = imports.gettext.domain('gnome-shell-extensions');
-const _ = Gettext.gettext;
-
 const ExtensionUtils = imports.misc.extensionUtils;
 const Main = imports.ui.main;
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
 const ShellMountOperation = imports.ui.shellMountOperation;
+
+const _ = ExtensionUtils.gettext;
 
 var MountMenuItem = GObject.registerClass(
 class MountMenuItem extends PopupMenu.PopupBaseMenuItem {
@@ -41,6 +40,8 @@ class MountMenuItem extends PopupMenu.PopupBaseMenuItem {
         ejectButton.connect('clicked', this._eject.bind(this));
         this.add(ejectButton);
 
+        this.hide();
+
         this._changedId = mount.connect('changed', this._syncVisibility.bind(this));
         this._syncVisibility();
     }
@@ -54,7 +55,21 @@ class MountMenuItem extends PopupMenu.PopupBaseMenuItem {
         super.destroy();
     }
 
-    _isInteresting() {
+    _fsIsRemote(root) {
+        return new Promise((resolve, reject) => {
+            const attr = Gio.FILE_ATTRIBUTE_FILESYSTEM_REMOTE;
+            root.query_filesystem_info_async(attr, null, (o, res) => {
+                try {
+                    const info = root.query_filesystem_info_finish(res);
+                    resolve(!info.get_attribute_boolean(attr));
+                } catch (e) {
+                    reject(e);
+                }
+            });
+        });
+    }
+
+    async _isInteresting() {
         if (!this.mount.can_eject() && !this.mount.can_unmount())
             return false;
         if (this.mount.is_shadowed())
@@ -62,17 +77,23 @@ class MountMenuItem extends PopupMenu.PopupBaseMenuItem {
 
         let volume = this.mount.get_volume();
 
-        if (!volume) {
-            // probably a GDaemonMount, could be network or
-            // local, but we can't tell; assume it's local for now
-            return true;
+        if (volume)
+            return volume.get_identifier('class') !== 'network';
+
+        const root = this.mount.get_root();
+
+        try {
+            return await this._fsIsRemote(root);
+        } catch (e) {
+            log(`Failed to query filesystem: ${e.message}`);
         }
 
-        return volume.get_identifier('class') !== 'network';
+        // Hack, fall back to looking at GType
+        return Gio._LocalFilePrototype.isPrototypeOf(root);
     }
 
-    _syncVisibility() {
-        this.visible = this._isInteresting();
+    async _syncVisibility() {
+        this.visible = await this._isInteresting();
     }
 
     _eject() {
@@ -135,10 +156,8 @@ class DriveMenu extends PanelMenu.Button {
         this.add_child(icon);
 
         this._monitor = Gio.VolumeMonitor.get();
-        this._addedId = this._monitor.connect('mount-added', (monitor, mount) => {
-            this._addMount(mount);
-            this._updateMenuVisibility();
-        });
+        this._addedId = this._monitor.connect('mount-added',
+            (monitor, mount) => this._addMount(mount));
         this._removedId = this._monitor.connect('mount-removed', (monitor, mount) => {
             this._removeMount(mount);
             this._updateMenuVisibility();
@@ -169,6 +188,8 @@ class DriveMenu extends PanelMenu.Button {
         let item = new MountMenuItem(mount);
         this._mounts.unshift(item);
         this.menu.addMenuItem(item, 0);
+
+        item.connect('notify::visible', () => this._updateMenuVisibility());
     }
 
     _removeMount(mount) {
@@ -195,17 +216,20 @@ class DriveMenu extends PanelMenu.Button {
     }
 });
 
+/** */
 function init() {
     ExtensionUtils.initTranslations();
 }
 
 let _indicator;
 
+/** */
 function enable() {
     _indicator = new DriveMenu();
     Main.panel.addToStatusArea('drive-menu', _indicator);
 }
 
+/** */
 function disable() {
     _indicator.destroy();
 }

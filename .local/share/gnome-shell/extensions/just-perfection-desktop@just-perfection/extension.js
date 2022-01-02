@@ -1,81 +1,113 @@
+/**
+ * Extension
+ *
+ * @author     Javad Rahmatzadeh <j.rahmatzadeh@gmail.com>
+ * @copyright  2020-2021
+ * @license    GNU General Public License v3.0
+ */
+
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 
-const {API, Manager, HotCorner} = Me.imports.lib;
-const {GLib, Gio, St, Clutter, Meta} = imports.gi;
+const {API, Manager} = Me.imports.lib;
+const {GObject, GLib, Gio, St, Clutter, Meta} = imports.gi;
 
 const Util = imports.misc.util;
 const Config = imports.misc.config;
-const ShellVersion = parseFloat(Config.PACKAGE_VERSION);
+const shellVersion = parseFloat(Config.PACKAGE_VERSION);
 
 const Main = imports.ui.main;
 const BackgroundMenu = imports.ui.backgroundMenu;
 const OverviewControls = imports.ui.overviewControls;
 const WorkspaceSwitcherPopup = imports.ui.workspaceSwitcherPopup;
-const ViewSelector = (ShellVersion < 40) ? imports.ui.viewSelector : null;
+const ViewSelector = (shellVersion < 40) ? imports.ui.viewSelector : null;
 const WorkspaceThumbnail = imports.ui.workspaceThumbnail;
-const SearchController = (ShellVersion >= 40) ? imports.ui.searchController : null;
+const SearchController = (shellVersion >= 40) ? imports.ui.searchController : null;
 const Panel = imports.ui.panel;
 const WorkspacesView = imports.ui.workspacesView;
-const WindowPreview = (ShellVersion >= 3.38) ? imports.ui.windowPreview : null;
+const WindowPreview = (shellVersion >= 3.38) ? imports.ui.windowPreview : null;
 const Workspace = imports.ui.workspace;
+const LookingGlass = imports.ui.lookingGlass;
 
 let manager;
 let api;
 
-function init() {}
+/**
+ * initiate extension
+ *
+ * @returns {void}
+ */
+function init()
+{
+}
 
+/**
+ * enable extension
+ *
+ * @returns {void}
+ */
 function enable()
 {
     // <3.36 can crash by enabling the extension
     // since <3.36 is not supported we simply return
     // to avoid bad experience for <3.36 users.
-    if (ShellVersion < 3.36) {
+    if (shellVersion < 3.36) {
         return;
     }
 
-    let interfaceSettings = new Gio.Settings({schema_id: 'org.gnome.desktop.interface'});
-    
+    let InterfaceSettings = new Gio.Settings({schema_id: 'org.gnome.desktop.interface'});
+
     api = new API.API({
-        'Main': Main,
-        'BackgroundMenu': BackgroundMenu,
-        'OverviewControls': OverviewControls,
-        'WorkspaceSwitcherPopup': WorkspaceSwitcherPopup,
-        'InterfaceSettings': interfaceSettings,
-        'SearchController': SearchController,
-        'ViewSelector': ViewSelector,
-        'WorkspaceThumbnail': WorkspaceThumbnail,
-        'WorkspacesView': WorkspacesView,
-        'St': St,
-        'Gio': Gio,
-        'GLib': GLib,
-        'Clutter': Clutter,
-        'Panel': Panel,
-        'WindowPreview' : WindowPreview,
-        'Workspace' : Workspace,
-        'Util' : Util,
-        'Meta' : Meta,
-    }, ShellVersion);
-    
+        Main,
+        BackgroundMenu,
+        OverviewControls,
+        WorkspaceSwitcherPopup,
+        InterfaceSettings,
+        SearchController,
+        ViewSelector,
+        WorkspaceThumbnail,
+        WorkspacesView,
+        Panel,
+        WindowPreview,
+        Workspace,
+        LookingGlass,
+        St,
+        Gio,
+        GLib,
+        Clutter,
+        Util,
+        Meta,
+        GObject,
+    }, shellVersion);
+
     api.open();
-    
-    let settings = ExtensionUtils.getSettings(Me.metadata['settings-schema']);
-    let hotCorner = new HotCorner.HotCorner({ 'API': api, 'St': St });
-    
+
+    let settings = ExtensionUtils.getSettings();
+
     manager = new Manager.Manager({
-        'API': api,
-        'Settings': settings,
-        'HotCorner': hotCorner,
-    }, ShellVersion);
-        
+        API: api,
+        Settings: settings,
+        InterfaceSettings,
+    }, shellVersion);
+
     manager.registerSettingsSignals();
     manager.applyAll();
 }
 
+/**
+ * disable extension
+ *
+ * @returns {void}
+ */
 function disable()
 {
-    (manager) && manager.revertAll();
-    manager = null;
-    (api) && api.close();
+    if (manager) {
+        manager.revertAll();
+        manager = null;
+    }
+
+    if (api) {
+        api.close();
+    }
 }
 

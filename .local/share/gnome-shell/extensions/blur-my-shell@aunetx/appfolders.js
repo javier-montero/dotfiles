@@ -8,16 +8,14 @@ const Settings = Me.imports.settings;
 const Utils = Me.imports.utilities;
 const PaintSignals = Me.imports.paint_signals;
 
-const default_sigma = 30;
-const default_brightness = 0.6;
 const transparent = Clutter.Color.from_pixel(0x00000000);
 const FOLDER_DIALOG_ANIMATION_TIME = 200;
 const FRAME_UPDATE_PERIOD = 16;
 
 let original_zoomAndFadeIn = null;
 let original_zoomAndFadeOut = null;
-let sigma = default_sigma;
-let brightness = default_brightness;
+let sigma = 30;
+let brightness = 0.6;
 
 let _zoomAndFadeIn = function () {
     let [sourceX, sourceY] =
@@ -163,7 +161,7 @@ var AppFoldersBlur = class AppFoldersBlur {
                     this.paint_signals.connect(icon._dialog, effect);
                 }, 100);
             } else if (this.prefs.HACKS_LEVEL.get() == 2) {
-                this._log("panel hack level 2");
+                this._log("appfolders hack level 2");
                 this.paint_signals.disconnect_all();
 
                 Utils.setTimeout(() => {
@@ -176,7 +174,7 @@ var AppFoldersBlur = class AppFoldersBlur {
 
             // ! END OF DIRTY PART
 
-            icon._dialog._viewBox.add_style_class_name('transparent-app-folder-dialogs');
+            icon._dialog._viewBox.set_style_class_name('app-folder-dialog transparent-app-folder-dialogs-' + 100 * this.prefs.APPFOLDER_DIALOG_OPACITY.get());
 
             icon._dialog._zoomAndFadeIn = _zoomAndFadeIn;
             icon._dialog._zoomAndFadeOut = _zoomAndFadeOut;
@@ -185,12 +183,14 @@ var AppFoldersBlur = class AppFoldersBlur {
 
     set_sigma(s) {
         sigma = s;
-        this.blur_appfolders();
+        if (this.prefs.BLUR_APPFOLDERS.get())
+            this.blur_appfolders();
     }
 
     set_brightness(b) {
         brightness = b;
-        this.blur_appfolders();
+        if (this.prefs.BLUR_APPFOLDERS.get())
+            this.blur_appfolders();
     }
 
     disable() {
@@ -211,7 +211,7 @@ var AppFoldersBlur = class AppFoldersBlur {
         Main.overview._overview.controls._appDisplay._folderIcons.forEach(icon => {
             if (icon._dialog) {
                 icon._dialog.remove_effect_by_name("appfolder-blur")
-                icon._dialog._viewBox.remove_style_class_name('transparent-app-folder-dialogs');
+                icon._dialog._viewBox.remove_style_class_name('transparent-app-folder-dialogs-' + 100 * this.prefs.APPFOLDER_DIALOG_OPACITY.get());
             }
         });
 

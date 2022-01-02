@@ -2,6 +2,7 @@
 
 const GObject = imports.gi.GObject;
 
+
 var Connections = class Connections {
     constructor() {
         this.buffer = [];
@@ -40,8 +41,12 @@ var Connections = class Connections {
     }
 
     disconnect_all_for(actor) {
-        let actor_connections = this.buffer.filter((infos) => {
-            infos.actor == actor
+        let actor_connections = []
+
+        this.buffer.forEach((infos) => {
+            if (infos.actor == actor) {
+                actor_connections.push(infos)
+            }
         });
 
         actor_connections.forEach((connection) => {

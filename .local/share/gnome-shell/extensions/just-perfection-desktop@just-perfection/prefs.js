@@ -1,34 +1,53 @@
+/**
+ * Prefs Dialog
+ *
+ * @author     Javad Rahmatzadeh <j.rahmatzadeh@gmail.com>
+ * @copyright  2020-2021
+ * @license    GNU General Public License v3.0
+ */
+
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 
 const {Prefs} = Me.imports.lib;
-const {Gtk, Gio, GObject} = imports.gi;
+const {Gtk, Gio, GLib, GObject} = imports.gi;
 
 const Config = imports.misc.config;
-const ShellVersion = parseFloat(Config.PACKAGE_VERSION);
+const shellVersion = parseFloat(Config.PACKAGE_VERSION);
 
 
-function init ()
+/**
+ * prefs initiation
+ *
+ * @returns {void}
+ */
+function init()
 {
-    ExtensionUtils.initTranslations(Me.metadata['gettext-domain']);
+    ExtensionUtils.initTranslations();
 }
 
-function buildPrefsWidget ()
+/**
+ * prefs widget
+ *
+ * @returns {Gtk.Widget}
+ */
+function buildPrefsWidget()
 {
     let gettextDomain = Me.metadata['gettext-domain'];
-    let UIFilePath = Me.dir.get_child("ui").get_path() + '/prefs.ui';
-    let binFolderPath = Me.dir.get_child("bin").get_path();
+    let UIFolderPath = Me.dir.get_child('ui').get_path();
+    let binFolderPath = Me.dir.get_child('bin').get_path();
 
     let builder = new Gtk.Builder();
-    let settings = ExtensionUtils.getSettings(Me.metadata['settings-schema']);
+    let settings = ExtensionUtils.getSettings();
     let prefs = new Prefs.Prefs({
-        'Builder': builder,
-        'Settings': settings,
-        'GObjectBindingFlags' : GObject.BindingFlags,
-        'Gtk': Gtk,
-        'Gio': Gio,
-    }, ShellVersion);
-    
-    return prefs.getMainPrefs(UIFilePath, binFolderPath, gettextDomain);
+        Builder: builder,
+        Settings: settings,
+        GObjectBindingFlags: GObject.BindingFlags,
+        Gtk,
+        Gio,
+        GLib,
+    }, shellVersion);
+
+    return prefs.getMainPrefs(UIFolderPath, binFolderPath, gettextDomain);
 }
 

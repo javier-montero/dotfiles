@@ -1,220 +1,238 @@
 /**
  * Manager Library
- * 
+ *
  * @author     Javad Rahmatzadeh <j.rahmatzadeh@gmail.com>
  * @copyright  2020-2021
  * @license    GNU General Public License v3.0
  */
 
-
 /**
- * Apply settings to the GNOME Shell 
+ * Apply settings to the GNOME Shell
  */
 var Manager = class
 {
     /**
      * Class Constructor
      *
-     * @param object dependecies
+     * @param {Object} dependecies
      *   'API' instance of lib::API
-     *   'HotCorner' instance of lib::HotCorner
      *   'Settings' instance of Gio::Settings
-     * @param float shellVersion
+     *   'InterfaceSettings' reference to Gio::Settings for 'org.gnome.desktop.interface'
+     * @param {number} shellVersion float in major.minor format
      */
     constructor(dependecies, shellVersion)
     {
         this._api = dependecies['API'] || null;
-        this._hotCorner = dependecies['HotCorner'] || null;
         this._settings = dependecies['Settings'] || null;
-        
+        this._interfaceSettings = dependecies['InterfaceSettings'] || null;
+
         this._shellVersion = shellVersion;
     }
-    
+
     /**
      * register all signals for settings
      *
-     * @return void
+     * @returns {void}
      */
     registerSettingsSignals()
     {
         this._settings.connect('changed::panel', () => {
             this._applyPanel(false);
         });
-        
+
+        this._settings.connect('changed::panel-in-overview', () => {
+            this._applyPanel(false);
+        });
+
         this._settings.connect('changed::search', () => {
             this._applySearch(false);
         });
-        
+
         this._settings.connect('changed::dash', () => {
             this._applyDash(false);
         });
-        
+
         this._settings.connect('changed::osd', () => {
             this._applyOSD(false);
         });
-        
+
         this._settings.connect('changed::workspace-popup', () => {
             this._applyWorkspacePopup(false);
         });
-        
+
         this._settings.connect('changed::workspace', () => {
             this._applyWorkspace(false);
         });
-        
+
         this._settings.connect('changed::background-menu', () => {
             this._applyBackgroundMenu(false);
         });
-        
+
         this._settings.connect('changed::gesture', () => {
             this._applyGesture(false);
         });
-        
+
         this._settings.connect('changed::hot-corner', () => {
             this._applyHotCorner(false);
         });
-        
+
         this._settings.connect('changed::theme', () => {
             this._applyTheme(false);
         });
-        
+
         this._settings.connect('changed::activities-button', () => {
             this._applyActivitiesButton(false);
         });
-        
+
         this._settings.connect('changed::app-menu', () => {
             this._applyAppMenu(false);
         });
-        
+
         this._settings.connect('changed::clock-menu', () => {
             this._applyClockMenu(false);
         });
-        
+
         this._settings.connect('changed::keyboard-layout', () => {
             this._applyKeyboardLayout(false);
         });
-        
+
         this._settings.connect('changed::accessibility-menu', () => {
             this._applyAccessibilityMenu(false);
         });
-        
+
         this._settings.connect('changed::aggregate-menu', () => {
             this._applyAggregateMenu(false);
         });
-        
+
         this._settings.connect('changed::panel-corner-size', () => {
             this._applyPanelCornerSize(false);
         });
-        
+
         this._settings.connect('changed::window-picker-icon', () => {
             this._applyWindowPickerIcon(false);
         });
-        
+
         this._settings.connect('changed::type-to-search', () => {
             this._applyTypeToSearch(false);
         });
-        
+
         this._settings.connect('changed::workspace-switcher-size', () => {
             this._applyWorkspaceSwitcherSize(false);
         });
-        
+
         this._settings.connect('changed::power-icon', () => {
             this._applyPowerIcon(false);
         });
-        
+
         this._settings.connect('changed::top-panel-position', () => {
             this._applyTopPanelPosition(false);
         });
-        
+
         this._settings.connect('changed::panel-arrow', () => {
             this._applyPanelArrow(false);
         });
-        
+
         this._settings.connect('changed::panel-notification-icon', () => {
             this._applyPanelNotificationIcon(false);
         });
-        
+
         this._settings.connect('changed::app-menu-icon', () => {
             this._applyAppMenuIcon(false);
         });
-        
+
         this._settings.connect('changed::clock-menu-position', () => {
             this._applyClockMenuPosition(false);
         });
-        
+
         this._settings.connect('changed::clock-menu-position-offset', () => {
             this._applyClockMenuPosition(false);
         });
-        
+
         this._settings.connect('changed::show-apps-button', () => {
             this._applyShowAppsButton(false);
         });
-        
+
         this._settings.connect('changed::animation', () => {
             this._applyAnimation(false);
         });
-        
+
         this._settings.connect('changed::activities-button-icon-path', () => {
             this._applyActivitiesButtonIcon(false);
         });
-        
+
         this._settings.connect('changed::activities-button-icon-monochrome', () => {
             this._applyActivitiesButtonIcon(false);
         });
-        
+
         this._settings.connect('changed::activities-button-label', () => {
             this._applyActivitiesButtonIcon(false);
         });
-        
+
         this._settings.connect('changed::window-demands-attention-focus', () => {
             this._applyWindowDemandsAttentionFocus(false);
         });
-        
+
         this._settings.connect('changed::dash-icon-size', () => {
             this._applyDashIconSize(false);
         });
-        
+
         this._settings.connect('changed::startup-status', () => {
             this._applyStartupStatus(false);
         });
-        
+
         this._settings.connect('changed::workspaces-in-app-grid', () => {
             this._applyWorkspacesInAppGrid(false);
         });
-        
+
         this._settings.connect('changed::notification-banner-position', () => {
             this._applyNotificationBannerPosition(false);
         });
-        
+
         this._settings.connect('changed::workspace-switcher-should-show', () => {
             this._applyWorkspaceSwitcherShouldShow(false);
         });
-        
+
         this._settings.connect('changed::panel-size', () => {
             this._applyPanelSize(false);
         });
-        
+
         this._settings.connect('changed::panel-button-padding-size', () => {
             this._applyPanelButtonPaddingSize(false);
         });
-        
+
+        this._settings.connect('changed::panel-indicator-padding-size', () => {
+            this._applyPanelIndicatorPaddingSize(false);
+        });
+
         this._settings.connect('changed::window-preview-caption', () => {
             this._applyWindowPreviewCaption(false);
         });
-        
+
+        this._settings.connect('changed::window-preview-close-button', () => {
+            this._applyWindowPreviewCloseButton(false);
+        });
+
         this._settings.connect('changed::workspace-background-corner-size', () => {
             this._applyWorkspaceBackgroundCornerSize(false);
         });
-        
+
         this._settings.connect('changed::workspace-wrap-around', () => {
             this._applyWorkspaceWrapAround(false);
         });
+
+        this._settings.connect('changed::ripple-box', () => {
+            this._applyRippleBox(false);
+        });
+
+        this._settings.connect('changed::double-super-to-appgrid', () => {
+            this._applyDoubleSuperToAppgrid(false);
+        });
     }
-    
-    
+
     /**
      * apply everything to the GNOME Shell
      *
-     * @return void
+     * @returns {void}
      */
     applyAll()
     {
@@ -255,15 +273,19 @@ var Manager = class
         this._applyWorkspaceSwitcherShouldShow(false);
         this._applyPanelSize(false);
         this._applyPanelButtonPaddingSize(false);
+        this._applyPanelIndicatorPaddingSize(false);
         this._applyWindowPreviewCaption(false);
+        this._applyWindowPreviewCloseButton(false);
         this._applyWorkspaceBackgroundCornerSize(false);
         this._applyWorkspaceWrapAround(false);
+        this._applyRippleBox(false);
+        this._applyDoubleSuperToAppgrid(false);
     }
-    
+
     /**
-     * revert everything that is done by this class to the GNOME Shell
+     * revert everything done by this class to the GNOME Shell
      *
-     * @return void
+     * @returns {void}
      */
     revertAll()
     {
@@ -304,36 +326,41 @@ var Manager = class
         this._applyWorkspaceSwitcherShouldShow(true);
         this._applyPanelSize(true);
         this._applyPanelButtonPaddingSize(true);
+        this._applyPanelIndicatorPaddingSize(true);
         this._applyWindowPreviewCaption(true);
+        this._applyWindowPreviewCloseButton(true);
         this._applyWorkspaceBackgroundCornerSize(true);
         this._applyWorkspaceWrapAround(true);
+        this._applyRippleBox(true);
+        this._applyDoubleSuperToAppgrid(true);
     }
-    
+
     /**
      * apply panel settings
      *
-     * @param bool forceOriginal
+     * @param {boolean} forceOriginal force original shell setting
      *
-     * @return void
+     * @returns {void}
      */
     _applyPanel(forceOriginal)
     {
-        if (forceOriginal || this._settings.get_boolean('panel')) {
+        let panel = this._settings.get_boolean('panel');
+        let panelInOverview = this._settings.get_boolean('panel-in-overview');
+
+        if (forceOriginal || panel) {
             this._api.panelShow();
         } else {
-            this._api.panelHide();
+            let mode = (panelInOverview) ? 1 : 0;
+            this._api.panelHide(mode);
         }
-        // since we use lib::HotCorner on hidden panel we need to
-        // apply hot corner on each call of this metod
-        this._applyHotCorner(false);
     }
-    
+
     /**
      * apply search settings
      *
-     * @param bool forceOriginal
+     * @param {boolean} forceOriginal force original shell setting
      *
-     * @return void
+     * @returns {void}
      */
     _applySearch(forceOriginal)
     {
@@ -343,13 +370,13 @@ var Manager = class
             this._api.searchEntryHide(false);
         }
     }
-    
+
     /**
      * apply type to search settings
      *
-     * @param bool forceOriginal
+     * @param {boolean} forceOriginal force original shell setting
      *
-     * @return void
+     * @returns {void}
      */
     _applyTypeToSearch(forceOriginal)
     {
@@ -359,13 +386,13 @@ var Manager = class
             this._api.startSearchDisable();
         }
     }
-    
+
     /**
      * apply dash settings
      *
-     * @param bool forceOriginal
+     * @param {boolean} forceOriginal force original shell setting
      *
-     * @return void
+     * @returns {void}
      */
     _applyDash(forceOriginal)
     {
@@ -379,9 +406,9 @@ var Manager = class
     /**
      * apply osd settings
      *
-     * @param bool forceOriginal
+     * @param {boolean} forceOriginal force original shell setting
      *
-     * @return void
+     * @returns {void}
      */
     _applyOSD(forceOriginal)
     {
@@ -391,13 +418,13 @@ var Manager = class
             this._api.OSDDisable();
         }
     }
-    
+
     /**
      * apply workspace popup settings
      *
-     * @param bool forceOriginal
+     * @param {boolean} forceOriginal force original shell setting
      *
-     * @return void
+     * @returns {void}
      */
     _applyWorkspacePopup(forceOriginal)
     {
@@ -407,13 +434,13 @@ var Manager = class
             this._api.workspacePopupDisable();
         }
     }
-    
+
     /**
      * apply workspace settings
      *
-     * @param bool forceOriginal
+     * @param {boolean} forceOriginal force original shell setting
      *
-     * @return void
+     * @returns {void}
      */
     _applyWorkspace(forceOriginal)
     {
@@ -423,13 +450,13 @@ var Manager = class
             this._api.workspaceSwitcherHide();
         }
     }
-    
+
     /**
      * apply background menu settings
      *
-     * @param bool forceOriginal
+     * @param {boolean} forceOriginal force original shell setting
      *
-     * @return void
+     * @returns {void}
      */
     _applyBackgroundMenu(forceOriginal)
     {
@@ -439,13 +466,13 @@ var Manager = class
             this._api.backgroundMenuDisable();
         }
     }
-    
+
     /**
      * apply gesture settings
      *
-     * @param bool forceOriginal
+     * @param {boolean} forceOriginal force original shell setting
      *
-     * @return void
+     * @returns {void}
      */
     _applyGesture(forceOriginal)
     {
@@ -455,63 +482,67 @@ var Manager = class
             this._api.gestureDisable();
         }
     }
-    
+
     /**
      * apply hot corner settings
      *
-     * @param bool forceOriginal
+     * @param {boolean} forceOriginal force original shell setting
      *
-     * @return void
+     * @returns {void}
      */
     _applyHotCorner(forceOriginal)
     {
+        if (this._shellVersion >= 41) {
+            return;
+        }
+    
         if (forceOriginal) {
             this._api.hotCornersDefault();
-            this._hotCorner.removeOveriewButton();
         } else if (!this._settings.get_boolean('hot-corner')) {
             this._api.hotCornersDisable();
-            this._hotCorner.removeOveriewButton();
         } else {
             this._api.hotCornersEnable();
-            // gnome hot corner won't work when the panel is hidden
-            // so we use lib::HotCorner instead
-            if (!this._api.isPanelVisible()) {
-                this._hotCorner.addOveriewButton();
-            } else {
-                this._hotCorner.removeOveriewButton();
-            }
         }
     }
-    
+
     /**
      * apply theme settings
      *
-     * @param bool forceOriginal
+     * @param {boolean} forceOriginal force original shell setting
      *
-     * @return void
+     * @returns {void}
      */
     _applyTheme(forceOriginal)
     {
         let className = 'just-perfection';
         let fallbackClassName = 'just-perfection-gnome3';
-        
+
         if (forceOriginal || !this._settings.get_boolean('theme')) {
             this._api.UIStyleClassRemove(className);
             this._api.UIStyleClassRemove(fallbackClassName);
         } else {
-            this._api.UIstyleClassAdd(className);
+            this._api.UIStyleClassAdd(className);
             if (this._shellVersion < 40) {
-                this._api.UIstyleClassAdd(fallbackClassName);
+                this._api.UIStyleClassAdd(fallbackClassName);
             }
         }
+
+        // TODO
+        // panel may get into the working area when the theme applies
+        // because the font size can make the panel height larger or smaller
+        // currently API doesn't do it automatically, so we are using
+        // private method form API here (which shouldn't be happening
+        // but this is just a hack. In the future updates API should do
+        // that not Manager).
+        this._api._emitPanelPositionChanged();
     }
-    
+
     /**
      * apply activites button settings
      *
-     * @param bool forceOriginal
+     * @param {boolean} forceOriginal force original shell setting
      *
-     * @return void
+     * @returns {void}
      */
     _applyActivitiesButton(forceOriginal)
     {
@@ -521,13 +552,13 @@ var Manager = class
             this._api.activitiesButtonHide();
         }
     }
-    
+
     /**
      * apply app menu settings
      *
-     * @param bool forceOriginal
+     * @param {boolean} forceOriginal force original shell setting
      *
-     * @return void
+     * @returns {void}
      */
     _applyAppMenu(forceOriginal)
     {
@@ -537,13 +568,13 @@ var Manager = class
             this._api.appMenuHide();
         }
     }
-    
+
     /**
      * apply clock menu (aka date menu) settings
      *
-     * @param bool forceOriginal
+     * @param {boolean} forceOriginal force original shell setting
      *
-     * @return void
+     * @returns {void}
      */
     _applyClockMenu(forceOriginal)
     {
@@ -553,13 +584,13 @@ var Manager = class
             this._api.dateMenuHide();
         }
     }
-    
+
     /**
      * apply keyboard layout settings
      *
-     * @param bool forceOriginal
+     * @param {boolean} forceOriginal force original shell setting
      *
-     * @return void
+     * @returns {void}
      */
     _applyKeyboardLayout(forceOriginal)
     {
@@ -569,13 +600,13 @@ var Manager = class
             this._api.keyboardLayoutHide();
         }
     }
-    
+
     /**
      * apply accessibility menu settings
      *
-     * @param bool forceOriginal
+     * @param {boolean} forceOriginal force original shell setting
      *
-     * @return void
+     * @returns {void}
      */
     _applyAccessibilityMenu(forceOriginal)
     {
@@ -585,13 +616,13 @@ var Manager = class
             this._api.accessibilityMenuHide();
         }
     }
-    
+
     /**
      * apply aggregate menu settings
      *
-     * @param bool forceOriginal
+     * @param {boolean} forceOriginal force original shell setting
      *
-     * @return void
+     * @returns {void}
      */
     _applyAggregateMenu(forceOriginal)
     {
@@ -601,18 +632,18 @@ var Manager = class
             this._api.aggregateMenuHide();
         }
     }
-    
+
     /**
      * apply panel corner size settings
      *
-     * @param bool forceOriginal
+     * @param {boolean} forceOriginal force original shell setting
      *
-     * @return void
+     * @returns {void}
      */
     _applyPanelCornerSize(forceOriginal)
     {
         let size = this._settings.get_int('panel-corner-size');
-        
+
         if (forceOriginal || size === 0) {
             this._api.panelCornerSetDefault();
         } else {
@@ -623,9 +654,9 @@ var Manager = class
     /**
      * apply window picker icon settings
      *
-     * @param bool forceOriginal
+     * @param {boolean} forceOriginal force original shell setting
      *
-     * @return void
+     * @returns {void}
      */
     _applyWindowPickerIcon(forceOriginal)
     {
@@ -635,31 +666,31 @@ var Manager = class
             this._api.windowPickerIconDisable();
         }
     }
-    
+
     /**
      * apply workspace switcher size settings
      *
-     * @param bool forceOriginal
+     * @param {boolean} forceOriginal force original shell setting
      *
-     * @return void
+     * @returns {void}
      */
     _applyWorkspaceSwitcherSize(forceOriginal)
     {
         let size = this._settings.get_int('workspace-switcher-size');
-        
+
         if (forceOriginal || size === 0) {
             this._api.workspaceSwitcherSetDefaultSize();
         } else {
             this._api.workspaceSwitcherSetSize(size / 100, false);
         }
     }
-    
+
     /**
      * apply power icon settings
      *
-     * @param bool forceOriginal
+     * @param {boolean} forceOriginal force original shell setting
      *
-     * @return void
+     * @returns {void}
      */
     _applyPowerIcon(forceOriginal)
     {
@@ -669,13 +700,13 @@ var Manager = class
             this._api.powerIconHide();
         }
     }
-    
+
     /**
      * apply top panel position settings
      *
-     * @param bool forceOriginal
+     * @param {boolean} forceOriginal force original shell setting
      *
-     * @return void
+     * @returns {void}
      */
     _applyTopPanelPosition(forceOriginal)
     {
@@ -685,13 +716,13 @@ var Manager = class
             this._api.panelSetPosition(1);
         }
     }
-    
+
     /**
      * apply panel arrow settings
      *
-     * @param bool forceOriginal
+     * @param {boolean} forceOriginal force original shell setting
      *
-     * @return void
+     * @returns {void}
      */
     _applyPanelArrow(forceOriginal)
     {
@@ -701,13 +732,13 @@ var Manager = class
             this._api.panelArrowDisable();
         }
     }
-    
+
     /**
      * apply panel notification icon settings
      *
-     * @param bool forceOriginal
+     * @param {boolean} forceOriginal force original shell setting
      *
-     * @return void
+     * @returns {void}
      */
     _applyPanelNotificationIcon(forceOriginal)
     {
@@ -717,13 +748,13 @@ var Manager = class
             this._api.panelNotificationIconDisable();
         }
     }
-    
+
     /**
      * apply app menu icon settings
      *
-     * @param bool forceOriginal
+     * @param {boolean} forceOriginal force original shell setting
      *
-     * @return void
+     * @returns {void}
      */
     _applyAppMenuIcon(forceOriginal)
     {
@@ -737,9 +768,9 @@ var Manager = class
     /**
      * apply clock menu position settings
      *
-     * @param bool forceOriginal
+     * @param {boolean} forceOriginal force original shell setting
      *
-     * @return void
+     * @returns {void}
      */
     _applyClockMenuPosition(forceOriginal)
     {
@@ -751,13 +782,13 @@ var Manager = class
             this._api.clockMenuPositionSet(pos, offset);
         }
     }
-    
+
     /**
      * apply show apps button settings
      *
-     * @param bool forceOriginal
+     * @param {boolean} forceOriginal force original shell setting
      *
-     * @return void
+     * @returns {void}
      */
     _applyShowAppsButton(forceOriginal)
     {
@@ -767,18 +798,18 @@ var Manager = class
             this._api.showAppsButtonDisable();
         }
     }
-    
+
     /**
      * apply animation settings
      *
-     * @param bool forceOriginal
+     * @param {boolean} forceOriginal force original shell setting
      *
-     * @return void
+     * @returns {void}
      */
     _applyAnimation(forceOriginal)
     {
         let animation = this._settings.get_int('animation');
-        
+
         let factors = [
             0.4, // fastest
             0.6, // faster
@@ -787,7 +818,7 @@ var Manager = class
             1.6, // slower
             2.8, // slowest
         ];
-        
+
         if (forceOriginal) {
             this._api.animationSpeedSetDefault();
             this._api.enablenAimationsSetDefault();
@@ -799,226 +830,300 @@ var Manager = class
             // default speed
             this._api.animationSpeedSetDefault();
             this._api.enablenAimationsSet(true);
-        } else if (typeof factors[animation - 2] !== 'undefined') {
+        } else if (factors[animation - 2] !== undefined) {
             // custom speed
             this._api.animationSpeedSet(factors[animation - 2]);
             this._api.enablenAimationsSet(true);
         }
     }
-    
+
     /**
      * apply show apps button settings
      *
-     * @param bool forceOriginal
+     * @param {boolean} forceOriginal force original shell setting
      *
-     * @return void
+     * @returns {void}
      */
     _applyActivitiesButtonIcon(forceOriginal)
     {
         let iconPath = this._settings.get_string('activities-button-icon-path');
         let monochrome = this._settings.get_boolean('activities-button-icon-monochrome');
         let label = this._settings.get_boolean('activities-button-label');
-        
+
         if (forceOriginal) {
             this._api.ativitiesButtonRemoveIcon();
         } else {
             this._api.ativitiesButtonAddIcon(1, iconPath, monochrome, label);
         }
     }
-    
+
     /**
      * apply window demands attention focus settings
      *
-     * @param bool forceOriginal
+     * @param {boolean} forceOriginal force original shell setting
      *
-     * @return void
+     * @returns {void}
      */
     _applyWindowDemandsAttentionFocus(forceOriginal)
     {
-        if (forceOriginal || !this._settings.get_boolean('window-demands-attention-focus')) {
+        let focus = this._settings.get_boolean('window-demands-attention-focus');
+
+        if (forceOriginal || !focus) {
             this._api.windowDemandsAttentionFocusDisable();
         } else {
             this._api.windowDemandsAttentionFocusEnable();
         }
     }
-    
+
     /**
      * apply dash icon size settings
      *
-     * @param bool forceOriginal
+     * @param {boolean} forceOriginal force original shell setting
      *
-     * @return void
+     * @returns {void}
      */
     _applyDashIconSize(forceOriginal)
     {
         let size = this._settings.get_int('dash-icon-size');
-        
+
         if (forceOriginal || size === 0) {
             this._api.dashIconSizeSetDefault();
         } else {
             this._api.dashIconSizeSet(size);
         }
     }
-    
+
     /**
      * apply startup status settings
      *
-     * @param bool forceOriginal
+     * @param {boolean} forceOriginal force original shell setting
      *
-     * @return void
+     * @returns {void}
      */
     _applyStartupStatus(forceOriginal)
     {
         let status = this._settings.get_int('startup-status');
-        
+
         if (forceOriginal) {
             this._api.startupStatusSetDefault();
         } else {
             this._api.startupStatusSet(status);
         }
     }
-    
+
     /**
      * apply workspaces in app grid status settings
      *
-     * @param bool forceOriginal
+     * @param {boolean} forceOriginal force original shell setting
      *
-     * @return void
+     * @returns {void}
      */
     _applyWorkspacesInAppGrid(forceOriginal)
     {
         let status = this._settings.get_boolean('workspaces-in-app-grid');
-        
+
         if (forceOriginal || status) {
             this._api.workspacesInAppGridEnable();
         } else {
             this._api.workspacesInAppGridDisable();
         }
     }
-    
+
     /**
      * apply notification banner position settings
      *
-     * @param bool forceOriginal
+     * @param {boolean} forceOriginal force original shell setting
      *
-     * @return void
+     * @returns {void}
      */
     _applyNotificationBannerPosition(forceOriginal)
     {
         let pos = this._settings.get_int('notification-banner-position');
-        
+
         if (forceOriginal) {
             this._api.notificationBannerPositionSetDefault();
         } else {
             this._api.notificationBannerPositionSet(pos);
         }
     }
-    
+
     /**
      * apply workspace switcher should show settings
      *
-     * @param bool forceOriginal
+     * @param {boolean} forceOriginal force original shell setting
      *
-     * @return void
+     * @returns {void}
      */
     _applyWorkspaceSwitcherShouldShow(forceOriginal)
     {
         let shouldShow = this._settings.get_boolean('workspace-switcher-should-show');
-        
+
         if (forceOriginal || !shouldShow) {
             this._api.workspaceSwitcherShouldShowSetDefault();
         } else {
             this._api.workspaceSwitcherShouldShowSetAlways();
         }
     }
-    
+
     /**
      * apply panel size settings
      *
-     * @param bool forceOriginal
+     * @param {boolean} forceOriginal force original shell setting
      *
-     * @return void
+     * @returns {void}
      */
     _applyPanelSize(forceOriginal)
     {
         let size = this._settings.get_int('panel-size');
-        
+
         if (forceOriginal || size === 0) {
             this._api.panelSetDefaultSize();
         } else {
             this._api.panelSetSize(size, false);
         }
     }
-    
+
     /**
      * apply panel button padding size settings
      *
-     * @param bool forceOriginal
+     * @param {boolean} forceOriginal force original shell setting
      *
-     * @return void
+     * @returns {void}
      */
     _applyPanelButtonPaddingSize(forceOriginal)
     {
         let size = this._settings.get_int('panel-button-padding-size');
-        
+
         if (forceOriginal || size === 0) {
             this._api.panelButtonHpaddingSetDefault();
         } else {
             this._api.panelButtonHpaddingSizeSet(size - 1);
         }
     }
-    
+
+    /**
+     * apply panel indicator padding size settings
+     *
+     * @param {boolean} forceOriginal force original shell setting
+     *
+     * @returns {void}
+     */
+    _applyPanelIndicatorPaddingSize(forceOriginal)
+    {
+        let size = this._settings.get_int('panel-indicator-padding-size');
+
+        if (forceOriginal || size === 0) {
+            this._api.panelIndicatorPaddingSetDefault();
+        } else {
+            this._api.panelIndicatorPaddingSizeSet(size - 1);
+        }
+    }
+
     /**
      * apply window preview caption settings
      *
-     * @param bool forceOriginal
+     * @param {boolean} forceOriginal force original shell setting
      *
-     * @return void
+     * @returns {void}
      */
     _applyWindowPreviewCaption(forceOriginal)
     {
         let status = this._settings.get_boolean('window-preview-caption');
-        
+
         if (forceOriginal || status) {
             this._api.windowPreviewCaptionEnable();
         } else {
             this._api.windowPreviewCaptionDisable();
         }
     }
-    
+
+    /**
+     * apply window preview close button settings
+     *
+     * @param {boolean} forceOriginal force original shell setting
+     *
+     * @returns {void}
+     */
+    _applyWindowPreviewCloseButton(forceOriginal)
+    {
+        let status = this._settings.get_boolean('window-preview-close-button');
+
+        if (forceOriginal || status) {
+            this._api.windowPreviewCloseButtonEnable();
+        } else {
+            this._api.windowPreviewCloseButtonDisable();
+        }
+    }
+
     /**
      * apply workspace background corner size settings
      *
-     * @param bool forceOriginal
+     * @param {boolean} forceOriginal force original shell setting
      *
-     * @return void
+     * @returns {void}
      */
     _applyWorkspaceBackgroundCornerSize(forceOriginal)
     {
         let size = this._settings.get_int('workspace-background-corner-size');
-        
+
         if (forceOriginal || size === 0) {
             this._api.workspaceBackgroundRadiusSetDefault();
         } else {
             this._api.workspaceBackgroundRadiusSet(size - 1);
         }
     }
-    
+
     /**
      * apply workspace wrap around settings
      *
-     * @param bool forceOriginal
+     * @param {boolean} forceOriginal force original shell setting
      *
-     * @return void
+     * @returns {void}
      */
     _applyWorkspaceWrapAround(forceOriginal)
     {
         let status = this._settings.get_boolean('workspace-wrap-around');
-        
+
         if (forceOriginal || !status) {
             this._api.workspaceWraparoundDisable();
         } else {
             this._api.workspaceWraparoundEnable();
+        }
+    }
+    
+    /**
+     * apply ripple box settings
+     *
+     * @param {boolean} forceOriginal force original shell setting
+     *
+     * @returns {void}
+     */
+    _applyRippleBox(forceOriginal)
+    {
+        let status = this._settings.get_boolean('ripple-box');
+
+        if (forceOriginal || status) {
+            this._api.rippleBoxEnable();
+        } else {
+            this._api.rippleBoxDisable();
+        }
+    }
+
+    /**
+     * apply double super to appgrid settings
+     *
+     * @param {boolean} forceOriginal force original shell setting
+     *
+     * @returns {void}
+     */
+    _applyDoubleSuperToAppgrid(forceOriginal)
+    {
+        let status = this._settings.get_boolean('double-super-to-appgrid');
+
+        if (forceOriginal || status) {
+            this._api.doubleSuperToAppGridEnable();
+        } else {
+            this._api.doubleSuperToAppGridDisable();
         }
     }
 }
