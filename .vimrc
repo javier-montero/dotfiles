@@ -58,6 +58,7 @@ let g:netrw_dirhistmax = 0		" prevent writing to netrw
 
 set undofile					" maintain undo history between sessions
 set undodir=~/.vim/tmp			" where undo history is maintained
+filetype plugin on
 
 if has("autocmd")				" return to last known cursor position
 	au BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") | exe "normal! g`\"" | endif
@@ -93,6 +94,10 @@ nnoremap <space> za				" space open/closes folds
 map <F1> :NERDTreeToggle<CR>
 let g:NERDTreeWinSize=40
 
+" Start NERDTree, unless a file or session is specified, eg. vim -S session_file.vim.
+autocmd StdinReadPre * let s:std_in=1
+autocmd VimEnter * if argc() == 0 && !exists('s:std_in') && v:this_session == '' | NERDTree | endif
+
 "AIRLINE
 let g:airline#extensions#tabline#enabled = 1
 let g:airline#extensions#tabline#formatter = 'unique_tail_improved'
@@ -122,7 +127,11 @@ let g:goyo_width = 80				" default: 80
 let g:goyo_height = 80				" default: 85%
 let g:goyo_linenr = 0				" default: 0
 
-"Emmet
+"EMMET
 let g:user_emmet_install_global = 0
 autocmd FileType html,css EmmetInstall
 "see: https://raw.githubusercontent.com/mattn/emmet-vim/master/TUTORIAL
+
+"VIM-MARKDOWN
+let g:vim_markdown_auto_insert_bullets = 0
+let g:vim_markdown_new_list_item_indent = 0
