@@ -38,6 +38,8 @@
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="selection-mode">none</property>
+            <!-- supported on gtk4 not 3. uncomment after 3.x EOS -->
+            <!-- <property name="show-separators">True</property> -->
             
             <child>
               <object class="GtkListBoxRow" id="hot_corner_row">
@@ -184,11 +186,13 @@
                                 <property name="xalign">0</property>
                                 <property name="wrap">True</property>
                                 <property name="width-chars">0</property>
-                                <property name="max-width-chars">0</property>
                                 <property name="margin-top">12</property>
                                 <style>
                                   <class name="dim-label"/>
                                 </style>
+                                <attributes>
+                                  <attribute name="scale" value="0.9"/>
+                                </attributes>
                               </object>
                             </child>
                             
@@ -259,11 +263,13 @@
                                 <property name="xalign">0</property>
                                 <property name="wrap">True</property>
                                 <property name="width-chars">0</property>
-                                <property name="max-width-chars">0</property>
                                 <property name="margin-top">12</property>
                                 <style>
                                   <class name="dim-label"/>
                                 </style>
+                                <attributes>
+                                  <attribute name="scale" value="0.9"/>
+                                </attributes>
                               </object>
                             </child>
                             
@@ -334,11 +340,13 @@
                                 <property name="xalign">0</property>
                                 <property name="wrap">True</property>
                                 <property name="width-chars">0</property>
-                                <property name="max-width-chars">0</property>
                                 <property name="margin-top">12</property>
                                 <style>
                                   <class name="dim-label"/>
                                 </style>
+                                <attributes>
+                                  <attribute name="scale" value="0.9"/>
+                                </attributes>
                               </object>
                             </child>
                             
@@ -409,11 +417,13 @@
                                 <property name="xalign">0</property>
                                 <property name="wrap">True</property>
                                 <property name="width-chars">0</property>
-                                <property name="max-width-chars">0</property>
                                 <property name="margin-top">12</property>
                                 <style>
                                   <class name="dim-label"/>
                                 </style>
+                                <attributes>
+                                  <attribute name="scale" value="0.9"/>
+                                </attributes>
                               </object>
                             </child>
                             
@@ -484,11 +494,13 @@
                                 <property name="xalign">0</property>
                                 <property name="wrap">True</property>
                                 <property name="width-chars">0</property>
-                                <property name="max-width-chars">0</property>
                                 <property name="margin-top">12</property>
                                 <style>
                                   <class name="dim-label"/>
                                 </style>
+                                <attributes>
+                                  <attribute name="scale" value="0.9"/>
+                                </attributes>
                               </object>
                             </child>
                             
@@ -559,11 +571,13 @@
                                 <property name="xalign">0</property>
                                 <property name="wrap">True</property>
                                 <property name="width-chars">0</property>
-                                <property name="max-width-chars">0</property>
                                 <property name="margin-top">12</property>
                                 <style>
                                   <class name="dim-label"/>
                                 </style>
+                                <attributes>
+                                  <attribute name="scale" value="0.9"/>
+                                </attributes>
                               </object>
                             </child>
                             

@@ -7,7 +7,7 @@
     <property name="orientation">vertical</property>
                   
     <child>
-      <object class="GtkBox" id="visiblity_title">
+      <object class="GtkBox" id="visibility_title">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
         <property name="margin-bottom">12</property>
@@ -27,17 +27,19 @@
     </child>
     
     <child>
-      <object class="GtkFrame" id="visiblity_frame">
+      <object class="GtkFrame" id="visibility_frame">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
         <property name="label-xalign">0</property>
         <property name="margin-bottom">36</property>
         
         <child>
-          <object class="GtkListBox" id="visiblity_listbox">
+          <object class="GtkListBox" id="visibility_listbox">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="selection-mode">none</property>
+            <!-- supported on gtk4 not 3. uncomment after 3.x EOS -->
+            <!-- <property name="show-separators">True</property> -->
             
             <child>
               <object class="GtkListBoxRow" id="panel_row">
@@ -89,51 +91,43 @@
             </child>
             
             <child>
-              <object class="GtkRevealer" id="panel_in_overview_revealer">
+              <object class="GtkListBoxRow" id="panel_in_overview_row">
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
-                <property name="reveal-child" bind-source="panel_switch" bind-property="active" bind-flags="invert-boolean|sync-create"/>
+                <property name="sensitive" bind-source="panel_switch" bind-property="active" bind-flags="invert-boolean|sync-create"/>
+                
                 <child>
-                  
-                  <object class="GtkListBoxRow" id="panel_in_overview_row">
+                  <object class="GtkBox" id="panel_in_overview_box">
                     <property name="visible">True</property>
-                    <property name="can-focus">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="margin-start">12</property>
+                    <property name="margin-end">12</property>
+                    <property name="margin-top">12</property>
+                    <property name="margin-bottom">12</property>
+                    <property name="orientation">vertical</property>
                     
                     <child>
-                      <object class="GtkBox" id="panel_in_overview_box">
+                      <object class="GtkBox" id="panel_in_overview_box2">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="margin-start">12</property>
-                        <property name="margin-end">12</property>
-                        <property name="margin-top">12</property>
-                        <property name="margin-bottom">12</property>
-                        <property name="orientation">vertical</property>
+                        <property name="spacing">32</property>
                         
                         <child>
-                          <object class="GtkBox" id="panel_in_overview_box2">
+                          <object class="GtkLabel" id="panel_in_overview_txt">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
-                            <property name="spacing">32</property>
-                            
-                            <child>
-                              <object class="GtkLabel" id="panel_in_overview_txt">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="valign">center</property>
-                                <property name="label" translatable="yes">Panel in Overview</property>
-                                <property name="xalign">0</property>
-                                <property name="hexpand">1</property>
-                              </object>
-                            </child>
-                            
-                            <child>
-                              <object class="GtkSwitch" id="panel_in_overview_switch">
-                                <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                                <property name="valign">center</property>
-                              </object>
-                            </child>
-                            
+                            <property name="valign">center</property>
+                            <property name="label" translatable="yes">Panel in Overview</property>
+                            <property name="xalign">0</property>
+                            <property name="hexpand">1</property>
+                          </object>
+                        </child>
+                        
+                        <child>
+                          <object class="GtkSwitch" id="panel_in_overview_switch">
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="valign">center</property>
                           </object>
                         </child>
                         
@@ -194,11 +188,13 @@
                                 <property name="xalign">0</property>
                                 <property name="wrap">True</property>
                                 <property name="width-chars">0</property>
-                                <property name="max-width-chars">0</property>
                                 <property name="margin-top">12</property>
                                 <style>
                                   <class name="dim-label"/>
                                 </style>
+                                <attributes>
+                                  <attribute name="scale" value="0.9"/>
+                                </attributes>
                               </object>
                             </child>
                             
@@ -269,11 +265,13 @@
                                 <property name="xalign">0</property>
                                 <property name="wrap">True</property>
                                 <property name="width-chars">0</property>
-                                <property name="max-width-chars">0</property>
                                 <property name="margin-top">12</property>
                                 <style>
                                   <class name="dim-label"/>
                                 </style>
+                                <attributes>
+                                  <attribute name="scale" value="0.9"/>
+                                </attributes>
                               </object>
                             </child>
                             
@@ -344,11 +342,13 @@
                                 <property name="xalign">0</property>
                                 <property name="wrap">True</property>
                                 <property name="width-chars">0</property>
-                                <property name="max-width-chars">0</property>
                                 <property name="margin-top">12</property>
                                 <style>
                                   <class name="dim-label"/>
                                 </style>
+                                <attributes>
+                                  <attribute name="scale" value="0.9"/>
+                                </attributes>
                               </object>
                             </child>
                             
@@ -419,11 +419,13 @@
                                 <property name="xalign">0</property>
                                 <property name="wrap">True</property>
                                 <property name="width-chars">0</property>
-                                <property name="max-width-chars">0</property>
                                 <property name="margin-top">12</property>
                                 <style>
                                   <class name="dim-label"/>
                                 </style>
+                                <attributes>
+                                  <attribute name="scale" value="0.9"/>
+                                </attributes>
                               </object>
                             </child>
                             
@@ -494,11 +496,13 @@
                                 <property name="xalign">0</property>
                                 <property name="wrap">True</property>
                                 <property name="width-chars">0</property>
-                                <property name="max-width-chars">0</property>
                                 <property name="margin-top">12</property>
                                 <style>
                                   <class name="dim-label"/>
                                 </style>
+                                <attributes>
+                                  <attribute name="scale" value="0.9"/>
+                                </attributes>
                               </object>
                             </child>
                             
@@ -569,11 +573,13 @@
                                 <property name="xalign">0</property>
                                 <property name="wrap">True</property>
                                 <property name="width-chars">0</property>
-                                <property name="max-width-chars">0</property>
                                 <property name="margin-top">12</property>
                                 <style>
                                   <class name="dim-label"/>
                                 </style>
+                                <attributes>
+                                  <attribute name="scale" value="0.9"/>
+                                </attributes>
                               </object>
                             </child>
                             
@@ -582,6 +588,160 @@
                         
                         <child>
                           <object class="GtkSwitch" id="aggregate_menu_switch">
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="valign">center</property>
+                          </object>
+                        </child>
+                        
+                      </object>
+                    </child>
+                    
+                  </object>
+                </child>
+                
+              </object>
+            </child>
+            
+            <child>
+              <object class="GtkListBoxRow" id="world_clock_row">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                
+                <child>
+                  <object class="GtkBox" id="world_clock_box">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="margin-start">12</property>
+                    <property name="margin-end">12</property>
+                    <property name="margin-top">12</property>
+                    <property name="margin-bottom">12</property>
+                    <property name="orientation">vertical</property>
+                    
+                    <child>
+                      <object class="GtkBox" id="world_clock_box2">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="spacing">32</property>
+                        
+                        <child>
+                          <object class="GtkBox">
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="orientation">vertical</property>
+                            
+                            <child>
+                              <object class="GtkLabel" id="world_clock_txt">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="valign">center</property>
+                                <property name="label" translatable="yes">World Clock</property>
+                                <property name="xalign">0</property>
+                                <property name="hexpand">1</property>
+                              </object>
+                            </child>
+                          
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="valign">center</property>
+                                <property name="label" translatable="yes">World clock in clock menu</property>
+                                <property name="xalign">0</property>
+                                <property name="wrap">True</property>
+                                <property name="width-chars">0</property>
+                                <property name="margin-top">12</property>
+                                <style>
+                                  <class name="dim-label"/>
+                                </style>
+                                <attributes>
+                                  <attribute name="scale" value="0.9"/>
+                                </attributes>
+                              </object>
+                            </child>
+                            
+                          </object>
+                        </child>
+                        
+                        <child>
+                          <object class="GtkSwitch" id="world_clock_switch">
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="valign">center</property>
+                          </object>
+                        </child>
+                        
+                      </object>
+                    </child>
+                    
+                  </object>
+                </child>
+                
+              </object>
+            </child>
+            
+            <child>
+              <object class="GtkListBoxRow" id="weather_row">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                
+                <child>
+                  <object class="GtkBox" id="weather_box">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="margin-start">12</property>
+                    <property name="margin-end">12</property>
+                    <property name="margin-top">12</property>
+                    <property name="margin-bottom">12</property>
+                    <property name="orientation">vertical</property>
+                    
+                    <child>
+                      <object class="GtkBox" id="weather_box2">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="spacing">32</property>
+                        
+                        <child>
+                          <object class="GtkBox">
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="orientation">vertical</property>
+                            
+                            <child>
+                              <object class="GtkLabel" id="weather_txt">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="valign">center</property>
+                                <property name="label" translatable="yes">Weather</property>
+                                <property name="xalign">0</property>
+                                <property name="hexpand">1</property>
+                              </object>
+                            </child>
+                          
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="valign">center</property>
+                                <property name="label" translatable="yes">Weather in clock menu</property>
+                                <property name="xalign">0</property>
+                                <property name="wrap">True</property>
+                                <property name="width-chars">0</property>
+                                <property name="margin-top">12</property>
+                                <style>
+                                  <class name="dim-label"/>
+                                </style>
+                                <attributes>
+                                  <attribute name="scale" value="0.9"/>
+                                </attributes>
+                              </object>
+                            </child>
+                            
+                          </object>
+                        </child>
+                        
+                        <child>
+                          <object class="GtkSwitch" id="weather_switch">
                             <property name="visible">True</property>
                             <property name="can-focus">True</property>
                             <property name="valign">center</property>
@@ -644,11 +804,13 @@
                                 <property name="xalign">0</property>
                                 <property name="wrap">True</property>
                                 <property name="width-chars">0</property>
-                                <property name="max-width-chars">0</property>
                                 <property name="margin-top">12</property>
                                 <style>
                                   <class name="dim-label"/>
                                 </style>
+                                <attributes>
+                                  <attribute name="scale" value="0.9"/>
+                                </attributes>
                               </object>
                             </child>
                             
@@ -719,11 +881,13 @@
                                 <property name="xalign">0</property>
                                 <property name="wrap">True</property>
                                 <property name="width-chars">0</property>
-                                <property name="max-width-chars">0</property>
                                 <property name="margin-top">12</property>
                                 <style>
                                   <class name="dim-label"/>
                                 </style>
+                                <attributes>
+                                  <attribute name="scale" value="0.9"/>
+                                </attributes>
                               </object>
                             </child>
                             
@@ -794,11 +958,13 @@
                                 <property name="xalign">0</property>
                                 <property name="wrap">True</property>
                                 <property name="width-chars">0</property>
-                                <property name="max-width-chars">0</property>
                                 <property name="margin-top">12</property>
                                 <style>
                                   <class name="dim-label"/>
                                 </style>
+                                <attributes>
+                                  <attribute name="scale" value="0.9"/>
+                                </attributes>
                               </object>
                             </child>
                             
@@ -869,11 +1035,13 @@
                                 <property name="xalign">0</property>
                                 <property name="wrap">True</property>
                                 <property name="width-chars">0</property>
-                                <property name="max-width-chars">0</property>
                                 <property name="margin-top">12</property>
                                 <style>
                                   <class name="dim-label"/>
                                 </style>
+                                <attributes>
+                                  <attribute name="scale" value="0.9"/>
+                                </attributes>
                               </object>
                             </child>
                             
@@ -944,11 +1112,13 @@
                                 <property name="xalign">0</property>
                                 <property name="wrap">True</property>
                                 <property name="width-chars">0</property>
-                                <property name="max-width-chars">0</property>
                                 <property name="margin-top">12</property>
                                 <style>
                                   <class name="dim-label"/>
                                 </style>
+                                <attributes>
+                                  <attribute name="scale" value="0.9"/>
+                                </attributes>
                               </object>
                             </child>
                             
@@ -1019,11 +1189,13 @@
                                 <property name="xalign">0</property>
                                 <property name="wrap">True</property>
                                 <property name="width-chars">0</property>
-                                <property name="max-width-chars">0</property>
                                 <property name="margin-top">12</property>
                                 <style>
                                   <class name="dim-label"/>
                                 </style>
+                                <attributes>
+                                  <attribute name="scale" value="0.9"/>
+                                </attributes>
                               </object>
                             </child>
                             
@@ -1094,11 +1266,13 @@
                                 <property name="xalign">0</property>
                                 <property name="wrap">True</property>
                                 <property name="width-chars">0</property>
-                                <property name="max-width-chars">0</property>
                                 <property name="margin-top">12</property>
                                 <style>
                                   <class name="dim-label"/>
                                 </style>
+                                <attributes>
+                                  <attribute name="scale" value="0.9"/>
+                                </attributes>
                               </object>
                             </child>
                             
@@ -1169,11 +1343,13 @@
                                 <property name="xalign">0</property>
                                 <property name="wrap">True</property>
                                 <property name="width-chars">0</property>
-                                <property name="max-width-chars">0</property>
                                 <property name="margin-top">12</property>
                                 <style>
                                   <class name="dim-label"/>
                                 </style>
+                                <attributes>
+                                  <attribute name="scale" value="0.9"/>
+                                </attributes>
                               </object>
                             </child>
                             
@@ -1244,11 +1420,13 @@
                                 <property name="xalign">0</property>
                                 <property name="wrap">True</property>
                                 <property name="width-chars">0</property>
-                                <property name="max-width-chars">0</property>
                                 <property name="margin-top">12</property>
                                 <style>
                                   <class name="dim-label"/>
                                 </style>
+                                <attributes>
+                                  <attribute name="scale" value="0.9"/>
+                                </attributes>
                               </object>
                             </child>
                             
@@ -1319,11 +1497,13 @@
                                 <property name="xalign">0</property>
                                 <property name="wrap">True</property>
                                 <property name="width-chars">0</property>
-                                <property name="max-width-chars">0</property>
                                 <property name="margin-top">12</property>
                                 <style>
                                   <class name="dim-label"/>
                                 </style>
+                                <attributes>
+                                  <attribute name="scale" value="0.9"/>
+                                </attributes>
                               </object>
                             </child>
                             
@@ -1394,11 +1574,13 @@
                                 <property name="xalign">0</property>
                                 <property name="wrap">True</property>
                                 <property name="width-chars">0</property>
-                                <property name="max-width-chars">0</property>
                                 <property name="margin-top">12</property>
                                 <style>
                                   <class name="dim-label"/>
                                 </style>
+                                <attributes>
+                                  <attribute name="scale" value="0.9"/>
+                                </attributes>
                               </object>
                             </child>
                             

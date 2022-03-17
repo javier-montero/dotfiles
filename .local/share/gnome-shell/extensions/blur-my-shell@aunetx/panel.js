@@ -2,12 +2,16 @@
 
 const { St, Shell, Meta, Gio, GLib } = imports.gi;
 const Main = imports.ui.main;
+const Config = imports.misc.config;
 const backgroundSettings = new Gio.Settings({ schema: 'org.gnome.desktop.background' })
 
 const Me = imports.misc.extensionUtils.getCurrentExtension();
 const Settings = Me.imports.settings;
 const Utils = Me.imports.utilities;
 const PaintSignals = Me.imports.paint_signals;
+
+const [GS_MAJOR, GS_MINOR] = Config.PACKAGE_VERSION.split('.');
+
 
 var PanelBlur = class PanelBlur {
     constructor(connections, prefs) {
@@ -40,18 +44,20 @@ var PanelBlur = class PanelBlur {
     enable() {
         this._log("blurring top panel");
 
+        if (GS_MAJOR < 42) {
+            // hide corners, can't style them
+            Main.panel._leftCorner.hide();
+            Main.panel._rightCorner.hide();
+            this.connections.connect(Main.panel._leftCorner, 'show', () => { Main.panel._leftCorner.hide(); });
+            this.connections.connect(Main.panel._rightCorner, 'show', () => { Main.panel._rightCorner.hide(); });
+        }
+
         // insert background parent
         let children = Main.layoutManager.panelBox.get_children();
         for (let i = 0; i < children.length; ++i)
             if (children[i].name == 'topbar-blurred-background-parent')
                 Main.layoutManager.panelBox.remove_child(children[i]);
         Main.layoutManager.panelBox.insert_child_at_index(this.background_parent, 0);
-
-        // hide corners, can't style them
-        Main.panel._leftCorner.hide();
-        Main.panel._rightCorner.hide();
-        this.connections.connect(Main.panel._leftCorner, 'show', () => { Main.panel._leftCorner.hide() });
-        this.connections.connect(Main.panel._rightCorner, 'show', () => { Main.panel._rightCorner.hide() });
 
         // remove background
         Main.panel.add_style_class_name('transparent-panel');
@@ -128,10 +134,7 @@ var PanelBlur = class PanelBlur {
                 this._log("panel hack level 2");
                 this.paint_signals.disconnect_all();
 
-                this.paint_signals.connect(Main.panel, this.effect);
-                Main.panel.get_children().forEach(child => {
-                    this.paint_signals.connect(child, this.effect);
-                });
+                this.paint_signals.connect(this.background, this.effect);
             } else {
                 this.paint_signals.disconnect_all();
             }
@@ -143,16 +146,19 @@ var PanelBlur = class PanelBlur {
     update_wallpaper(is_static) {
         // if static blur, get right wallpaper and update blur with it
         if (is_static) {
-            let bg = Main.layoutManager._backgroundGroup.get_child_at_index(Main.layoutManager.monitors.length - this.monitor.index - 1);
-            this.background.set_content(bg.get_content());
+            // the try/catch behaviour is used to prevent bugs like #136 and #137
+            try {
+                let bg = Main.layoutManager._backgroundGroup.get_child_at_index(Main.layoutManager.monitors.length - this.monitor.index - 1);
+                this.background.set_content(bg.get_content());
+            } catch (error) { this._log(`could not blur panel: ${error}`) }
         }
     }
 
     update_size(is_static) {
         this.background_parent.width = Main.panel.width;
         this.background.width = Main.panel.width;
-        this.background.height = Main.panel.height;
         let panel_box = Main.layoutManager.panelBox;
+        this.background.height = panel_box.height;
         let clip_box = panel_box.get_parent();
         if (is_static) {
             this.background.set_clip(
@@ -213,14 +219,16 @@ var PanelBlur = class PanelBlur {
         this._log("removing blur from top panel");
         Main.panel.remove_style_class_name('transparent-panel');
 
+        if (GS_MAJOR < 42) {
+            Main.panel._leftCorner.show();
+            Main.panel._rightCorner.show();
+        }
+
         try {
             Main.layoutManager.panelBox.remove_child(this.background_parent);
         } catch (e) { }
 
         this.connections.disconnect_all();
-
-        Main.panel._leftCorner.show();
-        Main.panel._rightCorner.show();
     }
 
     show() {

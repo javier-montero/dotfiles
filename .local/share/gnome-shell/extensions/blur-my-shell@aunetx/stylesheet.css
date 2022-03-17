@@ -3,8 +3,12 @@
     transition-duration: 500ms;
 }
 
-.app-folder {
+.blurred-overview .app-folder {
     background-color: rgba(0, 0, 0, 0.12);
+}
+
+.blurred-overview .workspace-animation {
+    background-color: transparent !important;
 }
 
 .transparent-app-folder-dialogs .edit-folder-button {
@@ -12,6 +16,9 @@
     border-radius: 19px;
 }
 
+.blurred-dash .dash-background {
+    background: transparent;
+}
 
 /*
 ! TRANSPARENT APPFOLDER DIALOGS

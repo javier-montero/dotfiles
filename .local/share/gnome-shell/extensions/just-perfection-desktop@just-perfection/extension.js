@@ -2,8 +2,8 @@
  * Extension
  *
  * @author     Javad Rahmatzadeh <j.rahmatzadeh@gmail.com>
- * @copyright  2020-2021
- * @license    GNU General Public License v3.0
+ * @copyright  2020-2022
+ * @license    GPL-3.0-only
  */
 
 const ExtensionUtils = imports.misc.extensionUtils;
@@ -28,6 +28,8 @@ const WorkspacesView = imports.ui.workspacesView;
 const WindowPreview = (shellVersion >= 3.38) ? imports.ui.windowPreview : null;
 const Workspace = imports.ui.workspace;
 const LookingGlass = imports.ui.lookingGlass;
+const MessageTray = imports.ui.messageTray;
+const OSDWindow = imports.ui.osdWindow;
 
 let manager;
 let api;
@@ -71,6 +73,8 @@ function enable()
         WindowPreview,
         Workspace,
         LookingGlass,
+        MessageTray,
+        OSDWindow,
         St,
         Gio,
         GLib,
@@ -87,7 +91,6 @@ function enable()
     manager = new Manager.Manager({
         API: api,
         Settings: settings,
-        InterfaceSettings,
     }, shellVersion);
 
     manager.registerSettingsSignals();
@@ -108,6 +111,7 @@ function disable()
 
     if (api) {
         api.close();
+        api = null;
     }
 }
 

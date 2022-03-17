@@ -6,6 +6,55 @@ We go to the next version after each release on [GNOME Shell Extensions website]
 
 ## [Unreleased]
 
+## [19.0.0 Ancher] - 2022-03-02
+
+### Fixed
+
+- Blurry search entry on GNOME Shell themes with box-shadow.
+- Prefs file chooser recursion.
+- SecondaryMonitorDisplay error on GNOME Shell 42.
+- Shell theme override OSD for GNOME Shell 42.
+- Shell theme override workspace switcher for GNOME Shell 42.
+- Workspace popup visiblity in GNOME Shell 42.
+
+### Added
+
+- Libadwaita for GNOME Shell 42 prefs.
+- Panel icon size.
+- Panel world clock visiblity.
+- Weather visiblity.
+
+## [18.0.0 Roslin] - 2022-02-12
+
+### Fixed
+
+- GNOME 3.x prefs error.
+
+## [17.0.0 Roslin] - 2022-02-11
+
+### Fixed
+
+- Emitting panel show when panel is visible.
+- Looking glass not showing up.
+- Looking glass position on startup when panel is hidden.
+- Prefs height going off the screen in small displays.
+- Prefs lunching url freeze on Wayland.
+- Prefs padding in GNOME Shell 42.
+- Prefs UI Improvement by [@muqtxdir](https://gitlab.gnome.org/muqtxdir).
+- Startup animation for hiding panel when panel is disabled.
+- Type to search when text entry content is replaced with another content.
+- Window goes under panel after unlock on Wayland.
+- Window picker caption visibility issue on Pop Shell.
+- Galician translation by [@frandieguez](https://gitlab.gnome.org/frandieguez).
+
+### Added
+
+- Bottom to notification banner position.
+
+### Removed
+
+- Panel corner size option for GNOME Shell 42.
+
 ## [16.0.0 Rembrandt] - 2021-11-15
 
 ### Fixed
@@ -301,4 +350,5 @@ We go to the next version after each release on [GNOME Shell Extensions website]
 - Hide top panel.
 - Hide workspace switcher.
 - Hot corner to toggle overview visibility.
+
 
