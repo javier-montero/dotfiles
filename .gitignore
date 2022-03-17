@@ -1,7 +1,9 @@
+.audacity-data
 .bash_history
 .cache
 .cargo
 .config
+.cups
 .gnupg
 .lesshst
 .local/*
@@ -12,10 +14,13 @@
 .minecraft
 .mozilla
 .notebook
+.npm
 .npmrc
 .nvidia-settings-rc
 .pki
+.python_history
 .pulse-cookie
+.sh_history
 .sqlite_history
 .ssh
 .steam
@@ -26,9 +31,12 @@
 .torrc
 .var
 .viminfo
+.vscode
+.vscode-oss
+.wget-hsts
 .win32
 .win64
-.cups
+BLT
 Desktop
 Downloads
 Games
