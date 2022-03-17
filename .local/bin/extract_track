@@ -1,0 +1,17 @@
+#!/bin/bash
+
+if [ $# != 1 ]
+then
+	echo "Usage: extract_track [input file]"
+	exit
+fi
+
+raw="/mnt/cache/video_edit/raw"
+extract="/mnt/cache/video_edit/extract"
+filename=`echo $1 | rev | cut -d / -f 1 | rev`
+file_prefix=`echo $filename | cut -d . -f 1`
+ext=`echo $1 | cut -d . -f 2`
+if [ -f $raw/$filename ]
+then
+	ffmpeg -y -i $raw/$filename -c copy -an $extract/$file_prefix"_video."$ext -map 0:a:0 -c copy $extract/$file_prefix"_audio0.m4a" -map 0:a:1 -c copy $extract/$file_prefix"_audio1.m4a" #
+fi

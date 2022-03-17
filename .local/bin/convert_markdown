@@ -1,0 +1,15 @@
+#!/bin/bash
+
+rm -rf build;
+mkdir -p build;
+for file in *.md
+do
+	file_name=$(echo $file | cut -d '.' -f 1);
+	markdown_py $file | sed 's/.md/.html/g' > build/$file_name.html;
+	sed -i '1s/^/\<link rel\=\"stylesheet\" href\=\"https\:\/\/unpkg\.com\/normalize\.css\@8\.0\.1\" type\=\"text\/css\"\>\n/' build/$file_name.html
+	sed -i '2s/^/\<link rel\=\"stylesheet\" href\=\"https\:\/\/unpkg\.com\/sakura\.css\/css\/sakura\.css\" type\=\"text\/css\"\>\n/' build/$file_name.html
+	if [ $file_name != "index" ]
+	then
+		sed -i '3s/$/\n\<a href\=\"\.\/index\.html\"\>Home\<\/a\>/' build/$file_name.html
+	fi
+done

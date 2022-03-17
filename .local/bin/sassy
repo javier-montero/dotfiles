@@ -1,2 +1,11 @@
 #!/bin/bash
+
+if [ $# == 1 ] && ( [ $1 == "-w" ] || [ $i == "--watch" ] )
+then
 	~/.local/bin/dart-sass/sass --watch "scss:css" --style compressed --no-source-map
+elif [ $# == 0 ]
+then
+	~/.local/bin/dart-sass/sass "scss:css" --style compressed --no-source-map
+else
+	echo "Usage: sassy [-w|--watch]"
+fi
