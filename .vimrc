@@ -40,7 +40,6 @@ set listchars=tab:>.,trail:.,extends:#,nbsp:.
 autocmd FileType md set spell
 autocmd FileType txt set spell
 set spellfile=~/.vim/spell/javi.utf-8.add
-set spell spelllang=en_us
 
 "MISC SETTINGS
 set backspace=indent,eol,start

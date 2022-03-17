@@ -72,3 +72,14 @@ nextcloud
 md
 basename
 for
+if
+curl
+init
+api
+sprintf
+CURLOPT
+setopt
+php
+pokeapi
+https
+pokemon
