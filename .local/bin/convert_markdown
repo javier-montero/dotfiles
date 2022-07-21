@@ -1,15 +1,68 @@
 #!/bin/bash
 
-rm -rf build;
-mkdir -p build;
-for file in *.md
-do
-	file_name=$(echo $file | cut -d '.' -f 1);
-	markdown_py $file | sed 's/.md/.html/g' > build/$file_name.html;
+function run_markdown_converter() {
+	file_name=$(echo $1 | cut -d '.' -f 1)
+	pretty_name=$(echo $file_name | sed 's/_/ /g' | sed -r 's/\<./\U&/g')
+	if [ $is_verbose == true ]; then echo "converting $1 to $file_name.html"; fi
+
+	if [ $1 != "index.md" ]
+	then
+		if [ $is_verbose == true ]; then echo "adding entry for $file_name to index.md"; fi
+		echo "* [$pretty_name](./$1)" >> index.md
+	fi
+	markdown_py $1 | sed 's/.md/.html/g' > build/$file_name.html
 	sed -i '1s/^/\<link rel\=\"stylesheet\" href\=\"https\:\/\/unpkg\.com\/normalize\.css\@8\.0\.1\" type\=\"text\/css\"\>\n/' build/$file_name.html
 	sed -i '2s/^/\<link rel\=\"stylesheet\" href\=\"https\:\/\/unpkg\.com\/sakura\.css\/css\/sakura\.css\" type\=\"text\/css\"\>\n/' build/$file_name.html
-	if [ $file_name != "index" ]
+	
+	if [ $1 != "index.md" ]; then sed -i '3s/$/\n\<a href\=\"\.\/index\.html\"\>Home\<\/a\>/' build/$file_name.html; fi
+}
+
+function cleanup_markdown() {
+	if [ $is_verbose == true ]
 	then
-		sed -i '3s/$/\n\<a href\=\"\.\/index\.html\"\>Home\<\/a\>/' build/$file_name.html
+		echo "cleaning up files:"
+		echo -e "\t./build"
+		echo -e "\t./index.md"
+	fi
+	rm -rf build
+	rm -f index.md
+	exit
+}
+
+is_verbose=false
+is_clean=false
+while getopts ":vch" opt
+do
+	case ${opt} in
+		c )
+			is_clean=true
+			;;
+		h )
+			echo "Usage:"
+			echo -e "\tconvert_markdown -c\t\tCleanup files built by $(basename $0)"
+			echo -e "\tconvert_markdown -v\t\tDisplay more information"
+			echo -e "\tconvert_markdown -h\t\tDisplay this help message"
+			exit
+			;;
+		v )
+			is_verbose=true
+			;;
+	esac
+done
+
+if [ $is_clean == true ]; then cleanup_markdown; fi
+rm -rf build
+mkdir -p build
+rm -f index.md
+if [ $is_verbose == true ]; then echo "creating index.md"; fi
+echo "# Index" > index.md
+for file in *.md
+do
+	if [ $file != "index.md" ]
+	then
+		run_markdown_converter $file
 	fi
 done
+
+run_markdown_converter "index.md"
+rm -f index.md

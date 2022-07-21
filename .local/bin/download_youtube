@@ -1,0 +1,22 @@
+#!/bin/bash
+
+if [ $# != 2 ]
+then
+	echo "USAGE: download_youtube [url] [name]"
+	exit
+fi
+
+current_directory=$(pwd | rev | cut -d '/' -f 1 | rev)
+download_archive=$(echo $1 | rev | cut -d '/' -f 1 | rev)
+
+if [ "$current_directory" == "channel" ] || [ "$current_directory" == "playlist" ]
+then
+	if ! grep -q "$2" $current_directory.txt
+	then
+		echo "$2: $1" >> $current_directory.txt
+	fi
+	mkdir -p "$2"
+	yt-dlp -c -f bestvideo*+bestaudio/best -S 'ext' --download-archive "$2"/archive.txt --windows-filenames --write-subs --sub-format srt --sub-langs 'en, es, ko' -o "$2"'/%(title)s (%(upload_date>%Y)s).%(ext)s' $1
+else
+	yt-dlp -c -f bestvideo*+bestaudio/best -S 'ext' --windows-filenames --write-subs --sub-format srt --sub-langs 'en, es, ko' -o '%(title)s (%(upload_date>%Y)s).%(ext)s' $1
+fi
