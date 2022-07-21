@@ -10,10 +10,15 @@ const ShellMountOperation = imports.ui.shellMountOperation;
 
 const _ = ExtensionUtils.gettext;
 
-var MountMenuItem = GObject.registerClass(
+Gio._promisify(Gio.File.prototype, 'query_filesystem_info_async');
+
 class MountMenuItem extends PopupMenu.PopupBaseMenuItem {
-    _init(mount) {
-        super._init({
+    static {
+        GObject.registerClass(this);
+    }
+
+    constructor(mount) {
+        super({
             style_class: 'drive-menu-item',
         });
 
@@ -55,20 +60,6 @@ class MountMenuItem extends PopupMenu.PopupBaseMenuItem {
         super.destroy();
     }
 
-    _fsIsRemote(root) {
-        return new Promise((resolve, reject) => {
-            const attr = Gio.FILE_ATTRIBUTE_FILESYSTEM_REMOTE;
-            root.query_filesystem_info_async(attr, null, (o, res) => {
-                try {
-                    const info = root.query_filesystem_info_finish(res);
-                    resolve(!info.get_attribute_boolean(attr));
-                } catch (e) {
-                    reject(e);
-                }
-            });
-        });
-    }
-
     async _isInteresting() {
         if (!this.mount.can_eject() && !this.mount.can_unmount())
             return false;
@@ -83,7 +74,9 @@ class MountMenuItem extends PopupMenu.PopupBaseMenuItem {
         const root = this.mount.get_root();
 
         try {
-            return await this._fsIsRemote(root);
+            const attr = Gio.FILE_ATTRIBUTE_FILESYSTEM_REMOTE;
+            const info = await root.query_filesystem_info_async(attr, null);
+            return !info.get_attribute_boolean(attr);
         } catch (e) {
             log(`Failed to query filesystem: ${e.message}`);
         }
@@ -141,12 +134,15 @@ class MountMenuItem extends PopupMenu.PopupBaseMenuItem {
 
         super.activate(event);
     }
-});
+}
 
-let DriveMenu = GObject.registerClass(
 class DriveMenu extends PanelMenu.Button {
-    _init() {
-        super._init(0.0, _('Removable devices'));
+    static {
+        GObject.registerClass(this);
+    }
+
+    constructor() {
+        super(0.0, _('Removable devices'));
 
         let icon = new St.Icon({
             icon_name: 'media-eject-symbolic',
@@ -214,7 +210,7 @@ class DriveMenu extends PanelMenu.Button {
 
         super._onDestroy();
     }
-});
+}
 
 /** */
 function init() {

@@ -1,219 +1,536 @@
 'use strict';
 
-const { St, Shell } = imports.gi;
+const { St, Shell, Gio, Gtk } = imports.gi;
 const Main = imports.ui.main;
 
 const Me = imports.misc.extensionUtils.getCurrentExtension();
 
-const Settings = Me.imports.settings;
-const Connections = Me.imports.connections;
+const { Connections } = Me.imports.conveniences.connections;
+const { Prefs } = Me.imports.conveniences.settings;
+const { Keys } = Me.imports.conveniences.keys;
 
-const Panel = Me.imports.panel;
-const Dash = Me.imports.dash;
-const Overview = Me.imports.overview;
-const DashToDock = Me.imports.dash_to_dock;
-const Lockscreen = Me.imports.lockscreen;
-const AppFolders = Me.imports.appfolders;
-const WindowList = Me.imports.window_list;
-const Applications = Me.imports.applications;
+const Panel = Me.imports.components.panel;
+const Overview = Me.imports.components.overview;
+const DashToDock = Me.imports.components.dash_to_dock;
+const Lockscreen = Me.imports.components.lockscreen;
+const AppFolders = Me.imports.components.appfolders;
+const WindowList = Me.imports.components.window_list;
+const Applications = Me.imports.components.applications;
+const Screenshot = Me.imports.components.screenshot;
+
+// This lists the components that need to be connected in order to either use
+// general sigma/brightness or their own.
+const INDEPENDENT_COMPONENTS = [
+    "overview", "appfolder", "panel", "dash_to_dock", "applications",
+    "lockscreen", "window_list", "screenshot"
+];
 
 
+/// The main extension class, created when the GNOME Shell is loaded.
 class Extension {
     constructor() { }
 
+    /// Enables the extension
     enable() {
-        this._prefs = new Settings.Prefs;
+        // add the extension to global to make it accessible to other extensions
+        // create it first as it is very useful when debugging crashes
+
+        global.blur_my_shell = this;
+
+        // create a Prefs instance, to manage extension's preferences
+        // it needs to be loaded before logging, as it checks for DEBUG
+
+        this._prefs = new Prefs(Keys);
 
         this._log("enabling extension...");
-        this._connections = [];
 
-        this._panel_blur = new Panel.PanelBlur(new Connections.Connections, this._prefs);
-        this._dash_blur = new Dash.DashBlur(new Connections.Connections, this._prefs);
-        this._dash_to_dock_blur = new DashToDock.DashBlur(new Connections.Connections, this._prefs);
-        this._overview_blur = new Overview.OverviewBlur(new Connections.Connections, this._prefs);
-        this._lockscreen_blur = new Lockscreen.LockscreenBlur(new Connections.Connections, this._prefs);
-        this._appfolders_blur = new AppFolders.AppFoldersBlur(new Connections.Connections, this._prefs);
-        this._window_list_blur = new WindowList.WindowListBlur(new Connections.Connections, this._prefs);
-        this._applications_blur = new Applications.ApplicationsBlur(new Connections.Connections, this._prefs);
+        // create main extension Connections instance
 
+        this._connection = new Connections;
 
-        this._connections.push(this._panel_blur.connections, this._dash_blur.connections,
-            this._dash_to_dock_blur.connections, this._overview_blur.connections,
-            this._lockscreen_blur.connections, this._appfolders_blur.connections,
-            this._window_list_blur.connections, this._applications_blur.connections);
+        // store it in a global array
+
+        this._connections = [this._connection];
+
+        // create an instance of each component, with its associated Connections
+
+        let init = _ => {
+            // create a Connections instance, to manage signals
+            let connection = new Connections;
+
+            // store it to keeps track of them globally
+            this._connections.push(connection);
+
+            return [connection, this._prefs];
+        };
+
+        this._panel_blur = new Panel.PanelBlur(...init());
+        this._dash_to_dock_blur = new DashToDock.DashBlur(...init());
+        this._overview_blur = new Overview.OverviewBlur(...init());
+        this._lockscreen_blur = new Lockscreen.LockscreenBlur(...init());
+        this._appfolder_blur = new AppFolders.AppFoldersBlur(...init());
+        this._window_list_blur = new WindowList.WindowListBlur(...init());
+        this._applications_blur = new Applications.ApplicationsBlur(...init());
+        this._screenshot_blur = new Screenshot.ScreenshotBlur(...init());
+
+        // connect each component to preferences change
 
         this._connect_to_settings();
 
-        if (this._prefs.BLUR_PANEL.get()) {
-            this._panel_blur.enable();
-        }
-        if (this._prefs.BLUR_DASH.get()) {
-            this._dash_blur.enable();
-            this._dash_to_dock_blur.enable();
-        }
-        if (this._prefs.BLUR_OVERVIEW.get()) {
-            this._overview_blur.enable();
-        }
-        if (this._prefs.BLUR_LOCKSCREEN.get()) {
-            this._lockscreen_blur.enable();
-        }
-        if (this._prefs.BLUR_APPFOLDERS.get()) {
-            this._appfolders_blur.enable();
-        }
-        if (this._prefs.BLUR_WINDOW_LIST.get()) {
-            this._window_list_blur.enable();
-        }
-        if (this._prefs.BLUR_APPLICATIONS.get()) {
-            this._applications_blur.enable();
+        // enable every component
+        // if the shell is still starting up, wait for it to be entirely loaded;
+        // this should prevent bugs like #136 and #137
+        if (Main.layoutManager._startingUp) {
+            this._connection.connect(
+                Main.layoutManager,
+                'startup-complete',
+                this._enable_components.bind(this)
+            );
+        } else {
+            this._enable_components();
         }
 
-        this._update_sigma();
-        this._update_brightness();
-
-        this._log("extension enabled.");
+        // try to enable the components as soon as possible anyway, this way the
+        // overview may load before the user sees it
+        try {
+            if (this._prefs.overview.BLUR && !this._overview_blur.enabled)
+                this._overview_blur.enable();
+        } catch (e) { }
+        try {
+            if (this._prefs.panel.BLUR && !this._panel_blur.enabled)
+                this._panel_blur.enable();
+        } catch (e) { }
     }
 
+    /// Disables the extension
     disable() {
         this._log("disabling extension...");
 
+        // disable every component
+
         this._panel_blur.disable();
-        this._dash_blur.disable();
         this._dash_to_dock_blur.disable();
         this._overview_blur.disable();
         this._lockscreen_blur.disable();
-        this._appfolders_blur.disable();
+        this._appfolder_blur.disable();
         this._window_list_blur.disable();
         this._applications_blur.disable();
+        this._screenshot_blur.disable();
+
+        // untrack them
 
         this._panel_blur = null;
-        this._dash_blur = null;
         this._dash_to_dock_blur = null;
         this._overview_blur = null;
         this._lockscreen_blur = null;
-        this._appfolders_blur = null;
+        this._appfolder_blur = null;
         this._window_list_blur = null;
         this._applications_blur = null;
 
-        this._disconnect_settings();
+        // make sure no settings change can re-enable them
 
-        // in theory, this shouldn't be needed if we switch to making modules responsible for disconnecting their own
-        // signals. For now, I will leave this small bit of code in. Calling disable on all modules has already
-        // done the same thing
+        this._prefs.disconnect_all_settings();
+
+        // force disconnecting every signal, even if component crashed
+
         this._connections.forEach((connections) => {
             connections.disconnect_all();
-        })
+        });
         this._connections = [];
+
+        // remove the extension from GJS's global
+
+        delete global.blur_my_shell;
 
         this._log("extension disabled.");
 
         this._prefs = null;
     }
 
+    /// Enables every component needed, should be called when the shell is
+    /// entirely loaded as the `enable` methods interact with it.
+    _enable_components() {
+        // enable each component if needed, and if it is not already enabled
+
+        if (this._prefs.panel.BLUR && !this._panel_blur.enabled)
+            this._panel_blur.enable();
+
+        if (this._prefs.dash_to_dock.BLUR) {
+            this._dash_to_dock_blur.enable();
+        }
+
+        if (this._prefs.overview.BLUR && !this._overview_blur.enabled)
+            this._overview_blur.enable();
+
+        if (this._prefs.lockscreen.BLUR)
+            this._lockscreen_blur.enable();
+
+        if (this._prefs.appfolder.BLUR)
+            this._appfolder_blur.enable();
+
+        if (this._prefs.applications.BLUR)
+            this._applications_blur.enable();
+
+        if (this._prefs.window_list.BLUR)
+            this._window_list_blur.enable();
+
+        if (this._prefs.screenshot.BLUR)
+            this._screenshot_blur.enable();
+
+        this._log("all components enabled.");
+    }
+
+    /// Updates needed things in each component when a preference changed
     _connect_to_settings() {
-        this._prefs.SIGMA.changed(() => {
+
+        // global blur values changed, update everybody
+
+        this._prefs.SIGMA_changed(() => {
             this._update_sigma();
         });
-        this._prefs.BRIGHTNESS.changed(() => {
+        this._prefs.BRIGHTNESS_changed(() => {
             this._update_brightness();
         });
+        this._prefs.COLOR_changed(() => {
+            this._update_color();
+        });
+        this._prefs.NOISE_AMOUNT_changed(() => {
+            this._update_noise_amount();
+        });
+        this._prefs.NOISE_LIGHTNESS_changed(() => {
+            this._update_noise_lightness();
+        });
+        this._prefs.COLOR_AND_NOISE_changed(() => {
+            // both updating noise amount and color calls `update_enabled` on
+            // each color and noise effects
+            this._update_noise_amount();
+            this._update_color();
+        });
 
-        this._prefs.BLUR_DASH.changed(() => {
-            if (this._prefs.BLUR_DASH.get()) {
-                this._dash_blur.enable();
-                this._dash_to_dock_blur.enable();
-            } else {
-                this._dash_blur.disable();
-                this._dash_to_dock_blur.disable();
-            }
+        // connect each component to use the proper sigma/brightness/color
+
+        INDEPENDENT_COMPONENTS.forEach(component => {
+            this._connect_to_individual_settings(component);
         });
-        this._prefs.BLUR_PANEL.changed(() => {
-            if (this._prefs.BLUR_PANEL.get()) {
-                this._panel_blur.enable();
-            } else {
-                this._panel_blur.disable();
-            }
-        });
-        this._prefs.BLUR_OVERVIEW.changed(() => {
-            if (this._prefs.BLUR_OVERVIEW.get()) {
+
+        // other component's preferences changed
+
+        // ---------- OVERVIEW ----------
+
+        // toggled on/off
+        this._prefs.overview.BLUR_changed(() => {
+            if (this._prefs.overview.BLUR) {
                 this._overview_blur.enable();
             } else {
                 this._overview_blur.disable();
             }
         });
-        this._prefs.BLUR_LOCKSCREEN.changed(() => {
-            if (this._prefs.BLUR_LOCKSCREEN.get()) {
+
+        // overview components style changed
+        this._prefs.overview.STYLE_COMPONENTS_changed(() => {
+            if (this._prefs.overview.BLUR) {
+                this._overview_blur.update_components_classname();
+            }
+        });
+
+
+        // ---------- APPFOLDER ----------
+
+        // toggled on/off
+        this._prefs.appfolder.BLUR_changed(() => {
+            if (this._prefs.appfolder.BLUR) {
+                this._appfolder_blur.enable();
+            } else {
+                this._appfolder_blur.disable();
+            }
+        });
+
+        // changed dialog opacity
+        this._prefs.appfolder.DIALOG_OPACITY_changed(() => {
+            if (this._prefs.appfolder.BLUR)
+                this._appfolder_blur.blur_appfolders();
+        });
+
+
+        // ---------- PANEL ----------
+
+        // toggled on/off
+        this._prefs.panel.BLUR_changed(() => {
+            if (this._prefs.panel.BLUR) {
+                this._panel_blur.enable();
+            } else {
+                this._panel_blur.disable();
+            }
+        });
+
+        this._prefs.COLOR_AND_NOISE_changed(() => {
+            // permits to make sure that the blur is not washed out when disabling
+            // the other effects
+            if (this._prefs.panel.BLUR)
+                this._panel_blur.invalidate_blur();
+        });
+
+        // static blur toggled on/off
+        this._prefs.panel.STATIC_BLUR_changed(() => {
+            if (this._prefs.panel.BLUR)
+                this._panel_blur.change_blur_type();
+        });
+
+        // panel blur's overview connection toggled on/off
+        this._prefs.panel.UNBLUR_IN_OVERVIEW_changed(() => {
+            this._panel_blur.connect_to_overview();
+        });
+
+        // panel blur's dynamic unblurring toggled on/off
+        this._prefs.panel.UNBLUR_DYNAMICALLY_changed(() => {
+            if (this._prefs.panel.BLUR)
+                this._panel_blur.connect_to_windows();
+        });
+
+
+        // ---------- DASH TO DOCK ----------
+
+        // toggled on/off
+        this._prefs.dash_to_dock.BLUR_changed(() => {
+            if (this._prefs.dash_to_dock.BLUR) {
+                this._dash_to_dock_blur.enable();
+            } else {
+                this._dash_to_dock_blur.disable();
+            }
+        });
+
+        // TODO implement static blur for dash
+        // static blur toggled on/off
+        this._prefs.dash_to_dock.STATIC_BLUR_changed(() => {
+            //if (this._prefs.dash_to_dock.BLUR)
+            //    this._dash_to_dock_blur.change_blur_type();
+        });
+
+        // dash-to-dock override background toggled on/off
+        this._prefs.dash_to_dock.OVERRIDE_BACKGROUND_changed(() => {
+            if (this._prefs.dash_to_dock.BLUR)
+                this._dash_to_dock_blur.update_background();
+        });
+
+        // dash-to-dock blur's overview connection toggled on/off
+        this._prefs.dash_to_dock.UNBLUR_IN_OVERVIEW_changed(() => {
+            if (this._prefs.dash_to_dock.BLUR)
+                this._dash_to_dock_blur.connect_to_overview();
+        });
+
+
+        // ---------- APPLICATIONS ----------
+
+        // toggled on/off
+        this._prefs.applications.BLUR_changed(() => {
+            if (this._prefs.applications.BLUR) {
+                this._applications_blur.enable();
+            } else {
+                this._applications_blur.disable();
+            }
+        });
+
+        // application whitelist changed
+        this._prefs.applications.WHITELIST_changed(_ => {
+            if (this._prefs.applications.BLUR)
+                this._applications_blur.update_all_windows();
+        });
+
+
+        // ---------- LOCKSCREEN ----------
+
+        // toggled on/off
+        this._prefs.lockscreen.BLUR_changed(() => {
+            if (this._prefs.lockscreen.BLUR) {
                 this._lockscreen_blur.enable();
             } else {
                 this._lockscreen_blur.disable();
             }
         });
-        this._prefs.BLUR_APPFOLDERS.changed(() => {
-            if (this._prefs.BLUR_APPFOLDERS.get()) {
-                this._appfolders_blur.enable();
-            } else {
-                this._appfolders_blur.disable();
-            }
-        });
-        this._prefs.BLUR_WINDOW_LIST.changed(() => {
-            if (this._prefs.BLUR_WINDOW_LIST.get()) {
+
+
+        // ---------- WINDOW LIST ----------
+
+        // toggled on/off
+        this._prefs.window_list.BLUR_changed(() => {
+            if (this._prefs.window_list.BLUR) {
                 this._window_list_blur.enable();
             } else {
                 this._window_list_blur.disable();
             }
         });
-        this._prefs.BLUR_APPLICATIONS.changed(() => {
-            if (this._prefs.BLUR_APPLICATIONS.get()) {
-                this._applications_blur.enable();
-            } else {
-                this._applications_blur.disable();
-            }
-        })
-        this._prefs.DASH_OPACITY.changed(() => {
-            this._dash_blur.update();
-        });
-        this._prefs.APPFOLDER_DIALOG_OPACITY.changed(() => {
-            this._appfolders_blur.blur_appfolders();
-        });
-        this._prefs.STATIC_BLUR.changed(() => {
-            this._panel_blur.change_blur_type();
-        });
-        this._prefs.HIDETOPBAR.changed(() => {
+
+
+        // ---------- HIDETOPBAR ----------
+
+        // toggled on/off
+        this._prefs.hidetopbar.COMPATIBILITY_changed(() => {
+            // no need to verify if it is enabled or not, it is done anyway
             this._panel_blur.connect_to_overview();
         });
+
+
+        // ---------- SCREENSHOT ----------
+
+        // toggled on/off
+        this._prefs.screenshot.BLUR_changed(() => {
+            if (this._prefs.screenshot.BLUR) {
+                this._screenshot_blur.enable();
+            } else {
+                this._screenshot_blur.disable();
+            }
+        });
     }
 
-    _disconnect_settings() {
-        this._prefs.SIGMA.disconnect();
-        this._prefs.BRIGHTNESS.disconnect();
+    /// Select the component by its name and connect it to its preferences
+    /// changes for general values, sigma and brightness.
+    ///
+    /// Doing this in such a way is less accessible but prevents a lot of
+    /// boilerplate and headaches.
+    _connect_to_individual_settings(name) {
+        // get component and preferences needed
+        let component = this['_' + name + '_blur'];
+        let component_prefs = this._prefs[name];
+
+        // general values switch is toggled
+        component_prefs.CUSTOMIZE_changed(() => {
+            if (component_prefs.CUSTOMIZE) {
+                component.set_sigma(component_prefs.SIGMA);
+                component.set_brightness(component_prefs.BRIGHTNESS);
+                component.set_color(component_prefs.COLOR);
+                component.set_noise_amount(component_prefs.NOISE_AMOUNT);
+                component.set_noise_lightness(component_prefs.NOISE_LIGHTNESS);
+            }
+            else {
+                component.set_sigma(this._prefs.SIGMA);
+                component.set_brightness(this._prefs.BRIGHTNESS);
+                component.set_color(this._prefs.COLOR);
+                component.set_noise_amount(this._prefs.NOISE_AMOUNT);
+                component.set_noise_lightness(this._prefs.NOISE_LIGHTNESS);
+            }
+        });
+
+        // sigma is changed
+        component_prefs.SIGMA_changed(() => {
+            if (component_prefs.CUSTOMIZE)
+                component.set_sigma(component_prefs.SIGMA);
+            else
+                component.set_sigma(this._prefs.SIGMA);
+        });
+
+        // brightness is changed
+        component_prefs.BRIGHTNESS_changed(() => {
+            if (component_prefs.CUSTOMIZE)
+                component.set_brightness(component_prefs.BRIGHTNESS);
+            else
+                component.set_brightness(this._prefs.BRIGHTNESS);
+        });
+
+        // color is changed
+        component_prefs.COLOR_changed(() => {
+            if (component_prefs.CUSTOMIZE)
+                component.set_color(component_prefs.COLOR);
+            else
+                component.set_color(this._prefs.COLOR);
+        });
+
+        // noise amount is changed
+        component_prefs.NOISE_AMOUNT_changed(() => {
+            if (component_prefs.CUSTOMIZE)
+                component.set_noise_amount(component_prefs.NOISE_AMOUNT);
+            else
+                component.set_noise_amount(this._prefs.NOISE_AMOUNT);
+        });
+
+        // noise lightness is changed
+        component_prefs.NOISE_LIGHTNESS_changed(() => {
+            if (component_prefs.CUSTOMIZE)
+                component.set_noise_lightness(component_prefs.NOISE_LIGHTNESS);
+            else
+                component.set_noise_lightness(this._prefs.NOISE_LIGHTNESS);
+        });
     }
 
+    /// Update each component's sigma value
     _update_sigma() {
-        let sigma = this._prefs.SIGMA.get();
+        INDEPENDENT_COMPONENTS.forEach(name => {
+            // get component and preferences needed
+            let component = this['_' + name + '_blur'];
+            let component_prefs = this._prefs[name];
 
-        this._panel_blur.set_sigma(sigma);
-        this._dash_to_dock_blur.set_sigma(sigma);
-        this._overview_blur.set_sigma(sigma);
-        this._lockscreen_blur.set_sigma(sigma);
-        this._appfolders_blur.set_sigma(sigma);
-        this._window_list_blur.set_sigma(sigma);
-        this._applications_blur.set_sigma(sigma);
+            // update sigma accordingly
+            if (component_prefs.CUSTOMIZE) {
+                component.set_sigma(component_prefs.SIGMA);
+            }
+            else {
+                component.set_sigma(this._prefs.SIGMA);
+            }
+        });
     }
 
+    /// Update each component's brightness value
     _update_brightness() {
-        let brightness = this._prefs.BRIGHTNESS.get();
+        INDEPENDENT_COMPONENTS.forEach(name => {
+            // get component and preferences needed
+            let component = this['_' + name + '_blur'];
+            let component_prefs = this._prefs[name];
 
-        this._panel_blur.set_brightness(brightness);
-        this._dash_to_dock_blur.set_brightness(brightness);
-        this._overview_blur.set_brightness(brightness);
-        this._lockscreen_blur.set_brightness(brightness);
-        this._appfolders_blur.set_brightness(brightness);
-        this._window_list_blur.set_brightness(brightness);
-        this._applications_blur.set_brightness(brightness);
+            // update brightness accordingly
+            if (component_prefs.CUSTOMIZE)
+                component.set_brightness(component_prefs.BRIGHTNESS);
+            else
+                component.set_brightness(this._prefs.BRIGHTNESS);
+        });
+    }
+
+    /// Update each component's color value
+    _update_color() {
+        INDEPENDENT_COMPONENTS.forEach(name => {
+            // get component and preferences needed
+            let component = this['_' + name + '_blur'];
+            let component_prefs = this._prefs[name];
+
+            // update color accordingly
+            if (component_prefs.CUSTOMIZE)
+                component.set_color(component_prefs.COLOR);
+            else
+                component.set_color(this._prefs.COLOR);
+        });
+    }
+
+    /// Update each component's noise amount value
+    _update_noise_amount() {
+        INDEPENDENT_COMPONENTS.forEach(name => {
+            // get component and preferences needed
+            let component = this['_' + name + '_blur'];
+            let component_prefs = this._prefs[name];
+
+            // update color accordingly
+            if (component_prefs.CUSTOMIZE)
+                component.set_noise_amount(component_prefs.NOISE_AMOUNT);
+            else
+                component.set_noise_amount(this._prefs.NOISE_AMOUNT);
+        });
+    }
+
+    /// Update each component's noise lightness value
+    _update_noise_lightness() {
+        INDEPENDENT_COMPONENTS.forEach(name => {
+            // get component and preferences needed
+            let component = this['_' + name + '_blur'];
+            let component_prefs = this._prefs[name];
+
+            // update color accordingly
+            if (component_prefs.CUSTOMIZE)
+                component.set_noise_lightness(component_prefs.NOISE_LIGHTNESS);
+            else
+                component.set_noise_lightness(this._prefs.NOISE_LIGHTNESS);
+        });
     }
 
     _log(str) {
-        if (this._prefs.DEBUG.get())
-            log(`[Blur my Shell] ${str}`)
+        if (this._prefs.DEBUG)
+            log(`[Blur my Shell] ${str}`);
     }
 }
 
