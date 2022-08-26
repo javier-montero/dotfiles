@@ -20,7 +20,7 @@ then
 	PATH="$HOME/.local/bin:$HOME/bin:$PATH"
 fi
 
-export PATH=$PATH:~/bin:~/.local/bin
+export PATH=$PATH:$HOME/bin:$HOME/.local/bin:$HOME/.config/composer/vendor/bin
 
 #-------------------------------------------------------------
 # Some settings
@@ -294,3 +294,7 @@ if test -n "$KITTY_INSTALLATION_DIR" -a -e "$KITTY_INSTALLATION_DIR/shell-integr
 #BEGIN_SCREENFETCH
 if [ -f /usr/bin/screenfetch ]; then screenfetch; fi
 #END_SCREENFETCH
+
+
+# Load Angular CLI autocompletion.
+source <(ng completion script)

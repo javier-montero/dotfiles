@@ -1,8 +1,8 @@
 #!/bin/bash
 
-if [ $(xrandr --query |grep HDMI-A-0 | cut -d ' ' -f 5 | cut -d '(' -f 2) == "normal" ]
+if [ $(xrandr --query |grep HDMI-A-0 | cut -d '(' -f 1 | rev | cut -d ' ' -f 2 | rev) == "right" ]
 then
-	xrandr --output HDMI-A-0 --rotate right
-else
 	xrandr --output HDMI-A-0 --rotate normal
+else
+	xrandr --output HDMI-A-0 --rotate right
 fi

@@ -14,10 +14,6 @@
 * Config:
 	* .config/kitty/kitty.conf
 
-## DE: Gnome/Gnome Shell:
-* Config:
-	* .local/share/gnome-shell/extensions/
-
 ## Theme:
 * Firefox: Nordic Polar Night
 * GTK-3: Nordic Darker v40

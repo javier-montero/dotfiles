@@ -8,7 +8,7 @@
 .lesshst
 .local/*
 .local/bin/*.AppImage
-.local/share/gnome-shell/application_state
+.local/share/gnome-shell/
 .icons
 .java
 .joplin
@@ -43,6 +43,7 @@
 .win32
 .win64
 .yarn
+anaconda3
 BLT
 Desktop
 Downloads
