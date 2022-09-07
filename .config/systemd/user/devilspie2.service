@@ -1,0 +1,10 @@
+[Unit]
+Description=obsidian
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/devilspie2
+ExecStop=/usr/bin/pkill devilspie2
+
+[Install]
+WantedBy=multi-user.target

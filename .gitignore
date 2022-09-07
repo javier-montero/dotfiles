@@ -1,8 +1,13 @@
+.angular-config.json
 .audacity-data
 .bash_history
 .cache
 .cargo
-.config
+.config/*
+!.config/systemd/
+!.config/systemd/user/
+.config/systemd/user/graphical-session.target.wants
+.config/systemd/user/multi-user.target.wants
 .cups
 .gnupg
 .lesshst
@@ -43,6 +48,7 @@
 .win32
 .win64
 .yarn
+.yarnrc
 anaconda3
 BLT
 Desktop

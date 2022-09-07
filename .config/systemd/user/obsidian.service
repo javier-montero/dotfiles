@@ -1,0 +1,10 @@
+[Unit]
+Description=obsidian
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/obsidian
+ExecStop=/usr/bin/pkill obsidian
+
+[Install]
+WantedBy=graphical-session.target
