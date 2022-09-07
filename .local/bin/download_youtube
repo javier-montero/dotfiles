@@ -1,8 +1,8 @@
 #!/bin/bash
 
-if [ $# != 2 ]
+if [ $# != 2 ] && [ $# != 1 ]
 then
-	echo "USAGE: download_youtube [url] [name]"
+	echo "USAGE: download_youtube url [name]"
 	exit
 fi
 
@@ -17,6 +17,9 @@ then
 	fi
 	mkdir -p "$2"
 	yt-dlp -c -f bestvideo*+bestaudio/best -S 'ext' --download-archive "$2"/archive.txt --windows-filenames --write-subs --sub-format srt --sub-langs 'en, es, ko' -o "$2"'/%(title)s (%(upload_date>%Y)s).%(ext)s' $1
+elif [ "$current_directory" == "music" ]
+then
+	yt-dlp -f 'ba' -x --audio-format flac $1 -o '%(title)s (%(upload_date>%Y)s).%(ext)s'
 else
 	yt-dlp -c -f bestvideo*+bestaudio/best -S 'ext' --windows-filenames --write-subs --sub-format srt --sub-langs 'en, es, ko' -o '%(title)s (%(upload_date>%Y)s).%(ext)s' $1
 fi
