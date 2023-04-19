@@ -297,4 +297,4 @@ if [ -f /usr/bin/screenfetch ]; then screenfetch; fi
 
 
 # Load Angular CLI autocompletion.
-source <(ng completion script)
+if [ -f /usr/bin/ng ]; then source <(ng completion script); fi
