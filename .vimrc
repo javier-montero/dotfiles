@@ -23,6 +23,8 @@ fu GetTerm()
 endfu
 "autocmd VimEnter * call GetTerm()
 
+cnoreabbrev vterm vert term
+
 "MAPPING
 :map <esc>[1;5D <C-Left>
 :map <esc>[1;5C <C-Right>
